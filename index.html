@@ -272,7 +272,7 @@ tr.cur td{background:var(--accent-soft)}
 h3.step{font-size:14px;margin:16px 0 8px;display:flex;align-items:center;gap:8px}
 h3.step:first-of-type{margin-top:4px}
 h3.step i{font-style:normal;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--f-mono);background:linear-gradient(120deg,var(--accent),var(--accent-2));color:var(--accent-ink)}
-.segcfg{display:grid;grid-template-columns:auto 1fr 84px;gap:6px 8px;align-items:center;font-size:13.5px}
+.segcfg{display:grid;grid-template-columns:auto 1fr 118px;gap:6px 8px;align-items:center;font-size:13.5px}
 .segcfg input[type=text]{padding:6px 8px;font-size:14px}
 .segcfg .run{color:var(--muted)}
 
@@ -542,12 +542,16 @@ var SPL=[['Run 1',310,'빨리 나가지 않기'],['스키에르그 1000m',275,'2
 var ROX=20; // 구간당 록스존 몫(초)
 var MODES={
   full:{n:'풀 시뮬레이션',s:'풀',d:'8km + 스테이션 8개 전체',k:'full'},
-  short:{n:'단축 시뮬레이션',s:'단축',d:'모든 구간 절반 · 러닝 500m, 스테이션 분량 ½',k:'half'},
-  custom:{n:'임의 시뮬레이션',s:'임의',d:'구간을 골라 구간별 목표를 직접 정해요',k:'half'}
+  short:{n:'단축 시뮬레이션',s:'단축',d:'모든 거리 · 개수를 같은 비율로 줄여요',k:'half'},
+  custom:{n:'임의 시뮬레이션',s:'임의',d:'구간을 고르고 구간마다 러닝 km · 스테이션 m 또는 개수를 정해요',k:'half'}
 };
-var SHORTN=['Run 1 · 500m','스키에르그 500m','Run 2 · 500m','슬레드 푸시 25m','Run 3 · 500m','슬레드 풀 25m','Run 4 · 500m','버피 브로드 점프 40m','Run 5 · 500m','로잉 500m','Run 6 · 500m','파머스 캐리 100m','Run 7 · 500m','샌드백 런지 50m','Run 8 · 500m','월볼 50개'];
+// 구간별 대회 기준 분량: 러닝은 km, 스테이션은 m 또는 개
+var SEGQ=[{q:1,u:'km'},{q:1000,u:'m'},{q:1,u:'km'},{q:50,u:'m'},{q:1,u:'km'},{q:50,u:'m'},{q:1,u:'km'},{q:80,u:'m'},{q:1,u:'km'},{q:1000,u:'m'},{q:1,u:'km'},{q:200,u:'m'},{q:1,u:'km'},{q:100,u:'m'},{q:1,u:'km'},{q:100,u:'개'}];
+var SEGNAME=['Run 1','스키에르그','Run 2','슬레드 푸시','Run 3','슬레드 풀','Run 4','버피 브로드 점프','Run 5','로잉','Run 6','파머스 캐리','Run 7','샌드백 런지','Run 8','월볼'];
+function fmtAmt(i,a){ var u=SEGQ[i].u; return u==='km'?(Math.round(a*100)/100)+'km':Math.round(a).toLocaleString('en-US')+u; }
+function segName(i,a){ return SEGNAME[i]+' '+fmtAmt(i,a); }
 var SCK='hyrox-incheon-2027-v1-simcfg';
-var simCfg=(function(){ try{ var c=JSON.parse(localStorage.getItem(SCK)||'null'); if(c&&Array.isArray(c.sel)&&c.sel.length===16) return {sel:c.sel,tgt:c.tgt||{}}; }catch(e){} return {sel:SPL.map(function(){ return true; }),tgt:{}}; })();
+var simCfg=(function(){ var d={sel:SPL.map(function(){ return true; }),amt:{},pct:50}; try{ var c=JSON.parse(localStorage.getItem(SCK)||'null'); if(c&&Array.isArray(c.sel)&&c.sel.length===16){ d.sel=c.sel; d.amt=c.amt||{}; d.pct=Number(c.pct)||50; } }catch(e){} return d; })();
 function saveSimCfg(){ try{ localStorage.setItem(SCK,JSON.stringify(simCfg)); }catch(e){} }
 // 구간별 목표: 홈에서 정한 목표 기록을 그 기록대 선수들의 실제 배분으로 나눈 값 (록스존은 16구간에 고르게)
 var STKEYS=['ski','push','pull','bbj','row','farm','lunge','wb'];
@@ -555,11 +559,12 @@ function goalSegTargets(){
   try{ var gi=goalInfo(); if(!gi) return null; var o=splitAt(gi.G,gi.T); if(!o) return null;
     return SPL.map(function(s,i){ return Math.round((i%2===0?o.runs[i/2]:o[STKEYS[(i-1)/2]])+o.rox/16); }); }catch(e){ return null; }
 }
+// 목표 시간은 분량에 비례 (대회 분량의 x배면 목표도 x배)
 function segsOf(mode){
-  var gt=goalSegTargets(), out=[];
-  SPL.forEach(function(s,i){ var base=gt?gt[i]:s[1]+ROX, run=i%2===0;
-    if(mode==='short') out.push({i:i,n:SHORTN[i],t:Math.round(base/2),tip:s[2],run:run});
-    else if(mode==='custom'){ if(simCfg.sel[i]) out.push({i:i,n:s[0],t:simCfg.tgt[i]||base,tip:s[2],run:run}); }
+  var gt=goalSegTargets(), out=[], f=Math.min(100,Math.max(1,simCfg.pct||50))/100;
+  SPL.forEach(function(s,i){ var base=gt?gt[i]:s[1]+ROX, run=i%2===0, q=SEGQ[i].q;
+    if(mode==='short') out.push({i:i,n:segName(i,q*f),t:Math.round(base*f),tip:s[2],run:run});
+    else if(mode==='custom'){ if(simCfg.sel[i]){ var a=simCfg.amt[i]||q; out.push({i:i,n:segName(i,a),t:Math.round(base*a/q),tip:s[2],run:run}); } }
     else out.push({i:i,n:s[0],t:base,tip:s[2],run:run});
   });
   return out;
@@ -780,7 +785,7 @@ function nextEvent(from){
 function renderToday(){
   var n=ui.sel, k=key(n), s=sessionFor(n), rec=dayRec(k), w=weekOf(n), z=zones();
   var ws=weekStart(w);
-  var h=goalCardHtml()+goalVsMeHtml()+heroHtml()+remainingHtml()+'<div class="eyebrow" style="margin:4px 2px -4px">이번 주 · 오늘 운동</div>';
+  var h=goalCardHtml()+goalVsMeHtml()+heroHtml()+'<div class="eyebrow" style="margin:4px 2px -4px">이번 주 · 오늘 운동</div>';
   h+='<div class="card"><div class="navd"><button class="btn sm ghost" data-act="prevw" aria-label="이전 주">‹</button><div class="lbl">'+(w<=0?'측정 주간':w+'주차 · '+phaseOf(w))+' <span class="muted num">'+md(ws)+'–'+md(ws+6)+'</span></div><button class="btn sm ghost" data-act="nextw" aria-label="다음 주">›</button></div>';
   h+='<div class="strip" style="margin-top:10px">';
   for(var i=0;i<7;i++){
@@ -915,10 +920,12 @@ function renderPlan(){
   h+='<tr><td>애틀릭스 WOD<div class="muted">'+(top.length?'주로 '+top.map(function(a){ return a[0]; }).join(' · '):'기록하면 여기에 세어져요')+'</div></td><td class="n">—</td><td class="n">'+K.wods.length+'회</td></tr>';
   h+='</table></div></div>';
 
-  // 전체 계획 (러닝 / 스테이션)
-  h+='<div class="card"><h2>전체 훈련 계획</h2><div class="muted" style="margin-bottom:10px">31주 · 4주에 한 번 회복 주</div><div class="tl">'+PHASE_PLAN.map(function(p){
-    var dts=phaseDates(p), cur=w>=p.a&&w<=p.b, past=w>p.b;
-    return '<div class="tl-i'+(cur?' cur':'')+'"'+(past?' style="opacity:.6"':'')+'><div class="tl-h"><b>'+p.n+'</b><span class="muted num">'+md(dts[0])+'–'+md(dts[1])+(p.a>0?' · '+(p.b-p.a+1)+'주':'')+(cur?' · 진행 중':past?' · 완료':'')+'</span></div><div class="tl-r"><span class="tg r">러닝</span>'+esc(p.run)+'</div><div class="tl-r"><span class="tg s">스테이션</span>'+esc(p.st)+'</div></div>';
+  // 훈련 계획 (러닝 / 스테이션) · 남은 기간
+  var left=Math.max(0,RACE_FIRST-TODAY);
+  h+='<div class="card"><h2>훈련 계획 · 남은 기간</h2><div class="muted" style="margin-bottom:10px">대회까지 <b style="color:var(--ink)">'+left+'일</b> (약 '+Math.ceil(left/7)+'주) · 지금 '+(w<=0?'측정 주간':w+'주차 '+phaseOf(w))+' · 4주에 한 번 회복 주</div><div class="tl">'+PHASE_PLAN.map(function(p){
+    var dts=phaseDates(p), cur=w>=p.a&&w<=p.b, past=w>p.b, wk=p.b-Math.max(p.a,w)+1;
+    var st=past?'완료':cur?(p.a>0?'진행 중 · '+wk+'주 남음':'진행 중'):(p.a>0?(p.b-p.a+1)+'주':'');
+    return '<div class="tl-i'+(cur?' cur':'')+'"'+(past?' style="opacity:.55"':'')+'><div class="tl-h"><b>'+p.n+'</b><span class="muted num">'+md(dts[0])+'–'+md(dts[1])+(st?' · '+st:'')+'</span></div>'+(past?'':'<div class="tl-r"><span class="tg r">러닝</span>'+esc(p.run)+'</div><div class="tl-r"><span class="tg s">스테이션</span>'+esc(p.st)+'</div>')+'</div>';
   }).join('')+'</div></div>';
 
   var all=0, done=0;
@@ -973,11 +980,17 @@ function renderTimer(){
     h+='<div class="card"><h2>시뮬레이션</h2><div class="muted">구간이 끝날 때마다 큰 버튼을 누르면 목표 대비 기록과 예상 완주 시간이 바로 나와요. 록스존 이동 시간은 각 구간에 포함돼요.</div>';
     h+='<div class="subnav" style="margin-top:12px;grid-template-columns:repeat(3,1fr)">'+Object.keys(MODES).map(function(m){ return '<button class="'+(m===ui.tmode?'on':'')+'" data-tmode="'+m+'">'+MODES[m].s+'</button>'; }).join('')+'</div>';
     h+='<div class="muted" style="margin-top:8px">'+MODES[ui.tmode].d+'</div>';
+    if(ui.tmode==='short'){
+      var sp=simCfg.pct||50;
+      h+='<div class="row" style="margin-top:12px"><span class="muted">대회 분량의</span><input type="number" inputmode="numeric" min="1" max="100" id="sim-pct" value="'+sp+'" style="width:76px"><span class="muted">%</span>'+[25,50,75].map(function(p){ return '<button class="chipbtn'+(sp===p?' on':'')+'" data-spct="'+p+'">'+p+'%</button>'; }).join('')+'</div>';
+      h+='<div class="muted" style="margin-top:6px">예: '+sp+'% → 러닝 '+fmtAmt(0,sp/100)+' ×8, 스키 '+fmtAmt(1,1000*sp/100)+', 월볼 '+fmtAmt(15,100*sp/100)+'. 목표 시간도 같은 비율로 줄어요.</div>';
+    }
     if(ui.tmode==='custom'){
       var gt=goalSegTargets();
       h+='<div class="chips" style="margin-top:12px">'+[['all','전체'],['h1','전반 (Run 1~4)'],['h2','후반 (Run 5~8)'],['run','러닝만'],['st','스테이션만']].map(function(p){ return '<button class="chipbtn" data-spre="'+p[0]+'">'+p[1]+'</button>'; }).join('')+'</div>';
-      h+='<div class="segcfg" style="margin-top:12px"><span></span><span class="muted">구간</span><span class="muted" style="text-align:right">목표 (분:초)</span>'+SPL.map(function(s,i){ var def=gt?gt[i]:s[1]+ROX; return '<input type="checkbox" id="sc-'+i+'" data-csg="'+i+'"'+(simCfg.sel[i]?' checked':'')+' aria-label="'+esc(s[0])+' 포함"><label for="sc-'+i+'" class="'+(i%2===0?'run':'')+'">'+esc(s[0])+'</label><input type="text" inputmode="numeric" data-ctg="'+i+'" value="'+(simCfg.tgt[i]?fmtT(simCfg.tgt[i]):'')+'" placeholder="'+fmtT(def)+'"'+(simCfg.sel[i]?'':' disabled')+'>'; }).join('')+'</div>';
-      h+='<div class="muted" style="margin-top:6px">목표 칸을 비워 두면 내 목표('+(gi?fmtT(gi.T):'—')+') 배분 값을 써요.</div>';
+      h+='<div class="segcfg" style="margin-top:12px"><span></span><span class="muted">구간 · 목표 시간</span><span class="muted" style="text-align:right">분량</span>'+SPL.map(function(s,i){ var Q=SEGQ[i], a=simCfg.amt[i]||Q.q, base=gt?gt[i]:s[1]+ROX;
+        return '<input type="checkbox" id="sc-'+i+'" data-csg="'+i+'"'+(simCfg.sel[i]?' checked':'')+' aria-label="'+esc(SEGNAME[i])+' 포함"><label for="sc-'+i+'" class="'+(i%2===0?'run':'')+'">'+esc(SEGNAME[i])+(simCfg.sel[i]?' <span class="muted num">'+fmtT(base*a/Q.q)+'</span>':'')+'</label><span class="row" style="gap:4px;flex-wrap:nowrap"><input type="number" inputmode="decimal" step="'+(Q.u==='km'?'0.1':'1')+'" min="0" data-camt="'+i+'" value="'+(simCfg.amt[i]!=null?simCfg.amt[i]:'')+'" placeholder="'+Q.q+'"'+(simCfg.sel[i]?'':' disabled')+'><span class="muted" style="width:20px">'+Q.u+'</span></span>'; }).join('')+'</div>';
+      h+='<div class="muted" style="margin-top:6px">분량 칸을 비우면 대회 분량(러닝 1km, 스키 1000m, 월볼 100개 …)이에요. 목표 시간은 내 목표('+(gi?fmtT(gi.T):'—')+') 배분을 분량에 비례해 계산해요.</div>';
     }
     h+='<div class="muted" style="margin-top:10px">목표 합계 <b class="num" style="color:var(--ink)">'+fmtT(targetTotal)+'</b> · '+segs.length+'구간'+(gi&&ui.tmode!=='custom'?' · 홈에서 정한 목표 '+fmtT(gi.T)+' 기준 배분':'')+'</div></div>';
   }
@@ -1684,16 +1697,6 @@ function goalVsMeHtml(){
   }
   return h+'</div>';
 }
-function remainingHtml(){
-  var w=Math.max(0,Math.min(31,weekOf(TODAY))), left=Math.max(0,RACE_FIRST-TODAY);
-  var h='<div class="card"><h2>남은 기간 계획</h2><div class="muted" style="margin-bottom:10px">대회까지 '+left+'일 (약 '+Math.ceil(left/7)+'주) · 지금 '+(w<=0?'측정 주간':w+'주차 '+phaseOf(w))+'</div><div class="tl">';
-  PHASE_PLAN.forEach(function(p){
-    if(p.b<w) return;
-    var dts=phaseDates(p), cur=w>=p.a&&w<=p.b, wk=p.b-Math.max(p.a,w)+1;
-    h+='<div class="tl-i'+(cur?' cur':'')+'"><div class="tl-h"><b>'+p.n+'</b><span class="muted num">'+md(dts[0])+'–'+md(dts[1])+(p.a>0?' · '+wk+'주':'')+(cur?' · 진행 중':'')+'</span></div><div class="tl-r"><span class="tg r">러닝</span>'+esc(p.run)+'</div><div class="tl-r"><span class="tg s">스테이션</span>'+esc(p.st)+'</div></div>';
-  });
-  return h+'</div><div class="row" style="margin-top:8px"><span class="sp"></span><button class="btn sm" data-tab-go="plan">전체 일정 ›</button></div></div>';
-}
 
 // 탭 안의 작은 메뉴: WOD 탭 = WOD 기록 / 측정 · 체중, 가이드 탭 = 가이드 / 식단
 var SUBS={wod:[['wod','WOD 기록'],['log','측정 기록 · 체중']],guide:[['guide','페이스 · 스테이션'],['diet','식단']]};
@@ -1743,6 +1746,7 @@ document.addEventListener('click',function(e){
   if(ds.week!=null){ var w=Number(ds.week); ui.open[w]=!ui.open[w]; render(); return; }
   if(ds.timer){ if(!tm){ ui.tmode=MODES[ds.timer]?ds.timer:'custom'; if(ds.preset) simPreset(ds.preset); } go('timer'); return; }
   if(ds.spre){ simPreset(ds.spre); render(); return; }
+  if(ds.spct){ simCfg.pct=Number(ds.spct); saveSimCfg(); render(); return; }
   if(ds.tmode){ ui.tmode=ds.tmode; render(); return; }
   // WOD
   if(ds.lib){ if(ds.lib==='new') ui.wd=blankWod(null); else { var lb=ATLIX.filter(function(x){ return x.id===ds.lib; })[0]; ui.wd=blankWod(lb); } render(); var wt=document.getElementById('w-score')||document.getElementById('w-t'); if(wt&&!wt.disabled) wt.scrollIntoView({block:'center'}); return; }
@@ -1879,7 +1883,8 @@ document.addEventListener('change',function(e){
   if(id==='w-fmt'){ readWodForm(); render(); }
   if(id==='w-team'){ readWodForm(); refreshWodPreview(); }
   if(e.target.dataset&&e.target.dataset.csg!=null){ simCfg.sel[Number(e.target.dataset.csg)]=e.target.checked; saveSimCfg(); render(); return; }
-  if(e.target.dataset&&e.target.dataset.ctg!=null){ var ci2=Number(e.target.dataset.ctg), ct=parseT(e.target.value); if(ct) simCfg.tgt[ci2]=ct; else delete simCfg.tgt[ci2]; saveSimCfg(); render(); return; }
+  if(e.target.dataset&&e.target.dataset.camt!=null){ var ci2=Number(e.target.dataset.camt), av=parseFloat(e.target.value); if(av>0) simCfg.amt[ci2]=av; else delete simCfg.amt[ci2]; saveSimCfg(); render(); return; }
+  if(id==='sim-pct'){ var spv=Math.round(Number(e.target.value)); if(spv>=1&&spv<=100){ simCfg.pct=spv; saveSimCfg(); render(); } else toast('1~100 사이 숫자를 넣어 주세요'); return; }
   if(id==='g-ag'){ store.goal.ag=e.target.value; saveGoal(); syncAnaToGoal(); render(); return; }
   if(id==='g-pct'){ var gp=Math.round(Number(e.target.value)); if(gp>=1&&gp<=99){ store.goal.pct=gp; saveGoal(); syncAnaToGoal(); render(); } else toast('1~99 사이 숫자를 넣어 주세요'); return; }
   if(id==='a-ag'){ ui.ana.ag=e.target.value; render(); }
