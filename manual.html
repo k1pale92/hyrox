@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0c1132">
+<title>하이록스 준비 앱 사용 설명서</title>
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@600&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<style>
+/* Layout: one reading column; each tab section pairs a phone screenshot with its how-to list (stacked on phones) */
+:root{
+  --bg:#eef0f7; --surface:#ffffff; --ink:#12152b; --muted:#5b6180; --line:#d8dcec; --chip:#e8ebf7;
+  --accent:#3654ff; --accent-2:#7a3cff; --accent-ink:#ffffff; --warn-soft:#fbebcf; --ok:#12854a;
+  --hero-a:#0c1132; --hero-b:#2d1672;
+  --f-display:"Black Han Sans","IBM Plex Sans KR","Malgun Gothic",sans-serif;
+  --f-body:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0a0c18; --surface:#161a2e; --ink:#eceefe; --muted:#9ba1c6; --line:#2a2f50; --chip:#20253f; --accent:#8c9cff; --accent-2:#b48cff; --accent-ink:#0a0e2a; --warn-soft:#372710; --ok:#5fd394; color-scheme:dark; }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.65;word-break:keep-all}
+.wrap{max-width:820px;margin:0 auto;padding:0 16px 64px}
+.hero{background:linear-gradient(135deg,var(--hero-a),var(--hero-b));color:#f3f4ff;padding:28px 16px 24px;margin:0 -16px 0}
+.hero-in{max-width:820px;margin:0 auto;display:flex;gap:14px;align-items:center}
+.hero img{width:64px;height:64px;border-radius:16px;flex:none}
+.hero h1{font-family:var(--f-display);font-weight:400;font-size:28px;line-height:1.2;margin:0}
+.hero p{margin:4px 0 0;color:#c4c8ee;font-size:14px}
+.cta{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 0}
+.cta a{display:inline-block;text-decoration:none;font-weight:700;border-radius:12px;padding:10px 16px;font-size:15px}
+.cta .pri{background:linear-gradient(120deg,var(--accent),var(--accent-2));color:var(--accent-ink)}
+.cta .sec{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+nav.toc{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin:0 -16px;padding:8px 16px;overflow-x:auto;white-space:nowrap}
+nav.toc a{display:inline-block;color:var(--muted);text-decoration:none;font-size:14px;padding:4px 10px;border-radius:999px}
+nav.toc a:hover{background:var(--chip);color:var(--ink)}
+section{margin-top:34px;scroll-margin-top:56px}
+h2{font-size:22px;margin:0 0 10px;text-wrap:balance}
+h3{font-size:17px;margin:18px 0 6px}
+p{margin:8px 0}
+ol,ul{padding-left:22px;margin:8px 0} li{margin:5px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+.pair{display:grid;grid-template-columns:240px 1fr;gap:18px;align-items:start}
+.shot{width:100%;max-width:240px;border-radius:22px;border:6px solid #11142a;box-shadow:0 14px 30px -18px rgba(0,0,0,.6);display:block;background:#fff}
+@media (max-width:640px){ .pair{grid-template-columns:1fr} .shot{max-width:260px;margin:0 auto} }
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 9px;border-radius:999px;background:var(--chip);color:var(--muted);margin-right:4px}
+.tip{background:var(--chip);border-radius:12px;padding:10px 14px;font-size:15px;margin-top:10px}
+.warn{background:var(--warn-soft);border-radius:12px;padding:12px 14px;font-size:15px}
+kbd,code{font-family:var(--f-mono);font-size:.92em;background:var(--chip);border-radius:6px;padding:1px 6px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--chip);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0}
+summary{font-weight:700;cursor:pointer}
+footer{margin-top:40px;color:var(--muted);font-size:14px}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hero"><div class="hero-in"><img src="icon-192.png" alt=""><div><h1>하이록스 준비 앱<br>사용 설명서</h1><p>목표를 정하면 지금 내 위치와 줄여야 할 시간을 보여 주는 개인 훈련 앱 · 업데이트 2026.10.11 · 제작 @81ondal</p></div></div>
+  <div class="hero-in"><div class="cta"><a class="pri" href="./">앱 열기</a><a class="sec" href="#install">설치 방법</a></div></div></div>
+
+<nav class="toc" aria-label="목차"><a href="#install">설치</a><a href="#start">처음 시작</a><a href="#home">홈</a><a href="#ana">분석</a><a href="#plan">일정</a><a href="#rec">기록</a><a href="#sim">시뮬레이션</a><a href="#guide">가이드</a><a href="#tips">입력 팁</a><a href="#data">데이터 · 백업</a><a href="#faq">자주 묻는 질문</a></nav>
+
+<section id="about">
+  <div class="card">
+    <p style="margin-top:0"><b>이 앱으로 할 수 있는 것</b></p>
+    <ul>
+      <li>내 디비전 · 나이대에서 <b>목표 순위(상위 몇 %)의 기록</b>과 지금 내 위치 보기</li>
+      <li>목표 기록을 러닝 · 스테이션 8개 · 록스존에 <b>얼마씩 배정</b>해야 하는지 보기</li>
+      <li>WOD · 웨이트 · 러닝 기록을 남기고, <b>하이록스 어느 종목에 도움이 됐는지</b> 보기</li>
+      <li>대회처럼 구간을 나눠 재는 <b>시뮬레이션 타이머</b>, 체중 기록, 식단 기준</li>
+    </ul>
+    <p class="tip" style="margin-bottom:0">기록 데이터 기준: <b>HYROX 인천 2026 (2026.5.15–17) 실제 결과</b> · Hyranking 집계 (중복 기록 제외). 해마다 참가자 수준이 오르니 목표는 조금 여유 있게 잡는 게 좋아요.</p>
+  </div>
+</section>
+
+<section id="install">
+  <h2>1. 설치하기</h2>
+  <p>앱스토어 없이 <b>링크로 설치</b>해요. 설치하면 홈 화면 아이콘으로 열리고, 주소창 없이 전체 화면으로 보여요.</p>
+  <div class="tbl"><table>
+    <tr><th>폰</th><th>방법</th></tr>
+    <tr><td><b>안드로이드</b></td><td><b>크롬</b>으로 <code>k1pale92.github.io/hyrox</code> 열기 → 오른쪽 위 <b>⋮</b> → <b>앱 설치</b> (또는 '홈 화면에 추가')</td></tr>
+    <tr><td><b>아이폰</b></td><td><b>사파리</b>로 같은 주소 열기 → 아래 <b>공유 버튼</b> → <b>홈 화면에 추가</b></td></tr>
+  </table></div>
+  <div class="tip"><b>업데이트 받기:</b> 새 버전이 나오면 앱을 완전히 닫았다가(최근 앱 목록에서 밀기) 다시 열면 돼요. 그래도 그대로면 한 번 더 닫았다 여세요.</div>
+</section>
+
+<section id="start">
+  <h2>2. 처음 시작 — 목표 정하기</h2>
+  <div class="pair"><img class="shot" src="manual/onboard.jpg" alt="첫 화면: 목표 설정" loading="lazy">
+    <div><ol>
+      <li><b>어떤 경기에 나가세요?</b> 종목(싱글 · 더블스), 디비전(오픈 · 프로 · 어댑티브), 성별, 에이지를 골라요. 더블스 에이지는 두 사람 평균 나이예요.</li>
+      <li><b>목표 순위</b>: 상위 몇 %에 들고 싶은지 숫자로 넣거나 10 · 25 · 50%를 눌러요. 바로 아래에 목표 기록이 계산돼요.</li>
+      <li><b>지금 내 기록</b> (선택): 10km 기록과 체중. 10km가 없으면 '내 예상'은 같은 그룹의 중간 기록으로 시작해요. 체중은 식단 계산에 써요.</li>
+      <li><b>시작하기</b>를 누르면 끝. 나중에 홈의 <b>목표 바꾸기</b>로 언제든 바꿀 수 있어요.</li>
+    </ol></div></div>
+</section>
+
+<section id="home">
+  <h2>3. 홈</h2>
+  <div class="pair"><img class="shot" src="manual/home.jpg" alt="홈 화면" loading="lazy">
+    <div><ul>
+      <li><b>내 목표</b>: 한 줄 요약과 목표 기록. 오른쪽 <b>목표 바꾸기</b>로 조건 변경</li>
+      <li><b>목표 vs 내 예상</b>: 목표 기록, 내 예상 기록, 내 에이지 · 전체에서 상위 몇 %인지</li>
+      <li><b>분포 그래프</b>: 파란 막대가 내 에이지, 회색이 전체. 초록 선이 목표, 주황 점선이 나</li>
+      <li><b>항목별 차이</b>: 러닝 · 스테이션 · 록스존에서 목표까지 줄여야 할 시간 (빨강 = 줄여야 함, 초록 ✓ = 이미 여유)</li>
+    </ul>
+    <div class="tip">'내 예상'은 측정 기록이 쌓일수록 정확해져요. 기록 탭 → 운동 기록 → <b>하이록스 종목 측정</b>에 넣으세요.</div></div></div>
+</section>
+
+<section id="ana">
+  <h2>4. 분석</h2>
+  <div class="pair"><img class="shot" src="manual/ana.jpg" alt="분석 화면" loading="lazy">
+    <div><ul>
+      <li><b>조건별 기록 분포</b>: 싱글 · 더블스, 디비전, 성별, 에이지를 바꿔 가며 인원과 상위 25% · 중간 기록, 분포 그래프 보기. 막대를 누르면 그 구간 비율과 누적 순위가 나와요.</li>
+      <li><b>총 시간 · 러닝 · 스테이션 · 록스존</b>: 보고 싶은 상위 % 구간(기본 10% · 50%)을 골라 시간 구성 비교. '구간 추가'로 33% 같은 원하는 %도 넣을 수 있어요.</li>
+      <li><b>목표 시간 배정</b>: 목표 %를 넣으면 그 기록대 선수들이 실제로 나눈 비율로 구간별 목표를 보여 주고, 내 현재와 비교해 <b>줄일 시간</b>을 알려 줘요. Run 1~8 목표도 나와요.</li>
+    </ul></div></div>
+</section>
+
+<section id="plan">
+  <h2>5. 일정</h2>
+  <div class="pair"><img class="shot" src="manual/plan.jpg" alt="일정 화면" loading="lazy">
+    <div><ul>
+      <li><b>오늘 운동</b>: 날짜 줄에서 날을 고르면 그날 운동이 나와요. 끝나면 <b>완료 표시</b>, 실제로 뛴 km, 힘든 정도(1–10), 메모를 남겨요.</li>
+      <li><b>이번 주 운동</b>: 러닝(인터벌 · 이지 · 롱런)과 스테이션(근력 · 복합)으로 나눠 계획 · 완료 횟수</li>
+      <li><b>훈련 계획 · 남은 기간</b>: 대회까지 남은 날과 단계별 러닝 / 스테이션 계획</li>
+      <li><b>주간 러닝량</b> 차트와 주차별 목록. 날짜를 누르면 위 '오늘 운동'에서 열려요.</li>
+    </ul>
+    <div class="warn">훈련 일정은 <b>만든 사람(45–49세 남자, 2027년 5월 인천 대회) 기준</b>으로 짜여 있어요. 무게 · 거리는 내 수준에 맞게 조절해서 참고하세요.</div></div></div>
+</section>
+
+<section id="rec">
+  <h2>6. 기록 — WOD · 운동 기록 · 체중</h2>
+  <p>기록 탭 위쪽 작은 메뉴로 세 화면을 오가요.</p>
+  <div class="pair"><img class="shot" src="manual/wod.jpg" alt="WOD 기록 화면" loading="lazy">
+    <div><h3 style="margin-top:0"><span class="tag">WOD</span>체육관 WOD 기록</h3><ol>
+      <li><b>사진으로 자동 입력</b>: WOD 프로그램 사진(과 결과 사진)을 골라 <b>사진 읽기</b> → 동작 · 무게 · 거리 · 횟수가 채워져요.</li>
+      <li>또는 <b>프로그램을 붙여 넣기</b> / 직접 입력</li>
+      <li><b>심플 입력</b>: 최종 시간이나 라운드만 / <b>고급 입력</b>: 동작마다 무게 · 거리 · 횟수와 내 시간</li>
+      <li>저장하면 <b>이번 WOD가 하이록스 어느 종목에 얼마나 자극을 줬는지</b>와 <b>대회 분량 대비 %</b>(예: 월볼 180개 = 180%)가 나와요.</li>
+    </ol></div></div>
+  <div class="pair" style="margin-top:18px"><img class="shot" src="manual/log.jpg" alt="운동 기록 화면" loading="lazy">
+    <div><h3 style="margin-top:0"><span class="tag">운동 기록</span>웨이트 · 러닝 · 측정</h3><ul>
+      <li><b>웨이트 · 러닝 기록</b>: 운동 앱 · 러닝 앱 화면 사진(최대 3장)을 읽거나 직접 입력. 세트는 <code>80×12, 80×12, 70×15</code></li>
+      <li><b>하이록스 영향 분석</b>: 어떤 운동이 어느 종목에 기여했는지 (예: 슬레드 푸시 ← 스쿼트), 부족한 종목</li>
+      <li><b>하이록스 종목 측정</b>: 스키 · 슬레드 · 월볼 등 8종목과 5km · 10km. '기준 거리 시간' 또는 '시간 · 분량 직접'(예: 5분에 1,146m → 1000m 환산)</li>
+      <li>종목을 누르면 날짜별 기록과 추이 그래프가 펼쳐져요.</li>
+    </ul></div></div>
+  <div class="pair" style="margin-top:18px"><img class="shot" src="manual/body.jpg" alt="체중 화면" loading="lazy">
+    <div><h3 style="margin-top:0"><span class="tag">체중</span>아침 공복 · 저녁 취침 전</h3><ul>
+      <li>날짜별로 아침 공복과 저녁 취침 전 체중을 넣어요 (하나만 넣어도 돼요).</li>
+      <li>최근 값, 7회 평균, 시작 대비 변화, 하루 변동(저녁 − 아침)과 두 선 추이 그래프</li>
+      <li>이 화면 아래에 <b>백업 · 복원</b>이 있어요.</li>
+    </ul></div></div>
+</section>
+
+<section id="sim">
+  <h2>7. 시뮬레이션</h2>
+  <div class="pair"><img class="shot" src="manual/timer.jpg" alt="시뮬레이션 화면" loading="lazy">
+    <div><ul>
+      <li><b>풀</b>: 러닝 8번 + 스테이션 8개. 구간 목표는 내 목표 기록을 실제 배분으로 나눈 값</li>
+      <li><b>단축</b>: 대회 분량의 몇 %로 할지 입력 (50% = 러닝 500m, 월볼 50개 …)</li>
+      <li><b>임의</b>: 구간을 골라 켜고, 구간마다 러닝 km · 스테이션 m · 개수를 직접. 목표 시간은 분량에 비례해 자동 계산</li>
+      <li><b>시작</b> 후 구간이 끝날 때마다 큰 버튼 → 목표 대비 차이와 예상 완주 시간이 바로 나와요. 끝나면 <b>기록에 저장</b>.</li>
+    </ul><div class="tip">타이머가 도는 동안 화면이 꺼지지 않게 해요. 앱을 닫아도 이어서 진행돼요.</div></div></div>
+</section>
+
+<section id="guide">
+  <h2>8. 가이드</h2>
+  <div class="pair"><img class="shot" src="manual/guide.jpg" alt="가이드 화면" loading="lazy">
+    <div><ul>
+      <li><b>페이스 · 스테이션</b>: 목표 구간 기록, 내 10km 기록으로 계산한 러닝 페이스(이지 · 역치 · 인터벌), 스테이션 기술 팁, 점검 지점</li>
+      <li><b>식단</b>: 그날 운동에 맞춘 단백질 · 탄수화물 · 지방 · 열량 (처음에 넣은 체중 기준), 대회 주 식단</li>
+    </ul></div></div>
+</section>
+
+<section id="tips">
+  <h2>9. 입력 팁</h2>
+  <div class="tbl"><table>
+    <tr><th>무엇</th><th>이렇게</th></tr>
+    <tr><td>시간</td><td>숫자만 넣어도 돼요: <code>0510</code> → 5:10, <code>4500</code> → 45:00, <code>12412</code> → 1:24:12</td></tr>
+    <tr><td>웨이트 세트</td><td><code>무게×횟수</code>를 쉼표로: <code>80×12, 80×12, 70×15</code> (맨몸은 횟수만 <code>15</code>)</td></tr>
+    <tr><td>사진 인식</td><td>설치한 앱에서는 폰에서 직접 글자를 읽어요. 처음 한 번 인식 데이터를 내려받아요(영어 약 5MB, 한글 포함 약 10MB). 영어 프로그램 화면은 잘 읽고, 손글씨는 틀릴 수 있으니 저장 전에 확인하세요.</td></tr>
+    <tr><td>WOD 고르기 동작</td><td>'Ski or Row'처럼 고르는 동작은 둘 다 잡혀요. 안 한 쪽을 눌러 빼세요.</td></tr>
+  </table></div>
+</section>
+
+<section id="data">
+  <h2>10. 데이터 · 백업</h2>
+  <ul>
+    <li>모든 기록은 <b>내 폰 안에만</b> 저장돼요. 서버로 보내지 않아요.</li>
+    <li>폰을 바꾸거나 앱(또는 브라우저 데이터)을 지우면 기록이 사라져요. <b>기록 → 체중 → 백업 파일 저장</b>을 가끔 해 두세요.</li>
+    <li>새 폰에서는 처음 화면의 <b>백업 불러오기</b> 또는 기록 → 체중 → <b>백업 파일 불러오기</b>.</li>
+  </ul>
+</section>
+
+<section id="faq">
+  <h2>11. 자주 묻는 질문</h2>
+  <details><summary>'내 예상'이 실제보다 너무 빠르거나 느려요</summary><p>측정 전에는 같은 그룹의 중간 기록으로 추정해요. 10km · 스테이션 측정을 넣을수록 내 기록으로 바뀌어요.</p></details>
+  <details><summary>WOD 효과 점수는 정확한가요?</summary><p>운동 시간 × 힘든 정도 × 동작과 하이록스 종목의 연관도로 계산한 <b>추정치</b>예요. 어느 종목을 많이 / 적게 했는지 비교하는 용도로 보세요.</p></details>
+  <details><summary>다른 대회 기록도 볼 수 있나요?</summary><p>지금은 HYROX 인천 2026 결과만 들어 있어요. 다른 대회는 업데이트에서 추가할 수 있어요.</p></details>
+  <details><summary>업데이트했는데 화면이 그대로예요</summary><p>앱을 완전히 닫았다가 다시 여세요. 처음 열 때 새 파일을 받고 다음 실행부터 적용될 수 있어요.</p></details>
+  <details><summary>아이폰에서도 되나요?</summary><p>사파리 → 공유 → 홈 화면에 추가로 설치해요. 대부분 기능이 같지만, 화면 꺼짐 방지처럼 일부는 iOS 버전에 따라 다를 수 있어요.</p></details>
+</section>
+
+<footer>
+  <p>피드백 · 오류 제보는 인스타그램 <b>@81ondal</b> DM으로 보내 주세요. 받은 의견으로 계속 업데이트해요.</p>
+  <p>업데이트 2026.10.11 · 기록 데이터: HYROX 인천 2026 결과 (Hyranking 집계)</p>
+</footer>
+</div>
+</body>
+</html>

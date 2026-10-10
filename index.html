@@ -248,6 +248,7 @@ tr.cur td{background:var(--accent-soft)}
 /* home */
 .goalbox{display:flex;flex-direction:column;gap:4px;background:var(--accent-soft);border-radius:14px;padding:10px 12px}
 .appinfo{font-size:12.5px;line-height:1.5;color:var(--muted);margin:0 0 12px}
+.appinfo a{color:var(--accent);font-weight:600}
 .goalbox .gh{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .goalbox .l{font-size:13px;color:var(--muted);letter-spacing:.04em;font-weight:600}
 .goalbox .v{font-weight:700;font-size:14.5px;letter-spacing:-.2px;display:flex;flex-wrap:wrap;align-items:baseline;column-gap:6px}
@@ -699,16 +700,22 @@ function dietType(n){
   if(s.kind==='run'||s.kind==='easy'||s.kind==='hyrox'||s.kind==='test') return 'mid';
   return 'low';
 }
+function bodyKg(){ return Number(store.goal&&store.goal.kg)||78; }
+// 단백질 1.8g/kg · 탄수화물 날 종류별 g/kg · 지방 0.8–1.0g/kg (로딩일 0.65–0.75). 감량 기간 쉬는 날은 탄수화물 −1g/kg
 function dietFor(type,n){
-  var d=DIET[type], o={n:d.n,c:d.c,k:d.k,f:d.f,p:'140g',cut:false};
-  if(type==='low' && n<=CUT_END){ o.c='155–230g'; o.k='1,800–2,200'; o.cut=true; }
-  return o;
+  var kg=bodyKg(), R={low:[3,4],mid:[5,6],high:[6,7],load:[7,8]}[type], fr=type==='load'?[.65,.75]:[.8,1];
+  var cut=type==='low'&&n<=CUT_END, c=[R[0]*kg,R[1]*kg]; if(cut){ c=[c[0]-kg,c[1]-kg]; }
+  var p=1.8*kg, f=[fr[0]*kg,fr[1]*kg], r5=function(x){ return Math.round(x/5)*5; }, r50=function(x){ return (Math.round(x/50)*50).toLocaleString('en-US'); };
+  return {n:DIET[type].n,c:r5(c[0])+'–'+r5(c[1])+'g',k:r50(p*4+c[0]*4+f[0]*9)+'–'+r50(p*4+c[1]*4+f[1]*9),f:r5(f[0])+'–'+r5(f[1])+'g',p:r5(p)+'g',cut:cut};
 }
 
 /* ---------- store ---------- */
 var LSK='hyrox-incheon-2027-v1';
-var APP_INFO={ver:'2026.10.11',by:'@81ondal'};
-var GOAL0={type:'single',div:'hyrox-open',g:'M',ag:'45-49',pct:25};
+var APP_INFO={ver:'2026.10.11',by:'@81ondal',manual:'https://k1pale92.github.io/hyrox/manual.html'};
+function manualUrl(){ return IS_PWA?'manual.html':APP_INFO.manual; }
+var GOAL0={type:'single',div:'hyrox-open',g:'M',ag:'45-49',pct:25,set:false,est:'group',kg:null};
+// 이미 기록이 있는 폰(만든 사람)은 첫 설정 화면을 건너뛰고 기존 추정 방식을 유지
+function ensureGoalSet(){ if(store.goal.set) return; var has=Object.keys(store.days).length||store.tests.length||store.wods.length||store.workouts.length||store.body.length; if(has){ store.goal.set=true; store.goal.est='owner'; if(!store.goal.kg) store.goal.kg=78; saveLocal(); } }
 var store={mode:'local',days:{},tests:[],body:[],wods:[],workouts:[],goal:Object.assign({},GOAL0)};
 var col=null, chains={};
 function loadLocal(){ try{ var s=JSON.parse(localStorage.getItem(LSK)||'null'); if(s){ store.days=s.days||{}; store.tests=s.tests||[]; store.body=s.body||[]; store.wods=s.wods||[]; store.workouts=s.workouts||[]; if(s.goal) store.goal=Object.assign({},GOAL0,s.goal); } }catch(e){} }
@@ -763,7 +770,7 @@ function initDb(){
           else if(doc.id==='profile'&&v.goal) goal=v.goal;
           else if(doc.id==='workouts') workouts=Array.isArray(v.entries)?v.entries:[];
         });
-        store.days=days; store.tests=tests; store.body=body; store.wods=wods; store.workouts=workouts; if(goal){ store.goal=Object.assign({},GOAL0,goal); syncAnaToGoal(); } saveLocal();
+        store.days=days; store.tests=tests; store.body=body; store.wods=wods; store.workouts=workouts; if(goal){ store.goal=Object.assign({},GOAL0,goal); syncAnaToGoal(); } ensureGoalSet(); saveLocal();
         softRender();
       },function(){ store.mode='local'; setSaveBadge(); toast('계정 저장이 끊겨서 이 기기에만 저장해요.'); });
     });
@@ -780,7 +787,7 @@ function isStandalone(){ try{ return window.matchMedia('(display-mode: standalon
 var TODAY=todayDn();
 var ui={tab:'today', sel:Math.min(Math.max(TODAY,PLAN_START),PLAN_END), open:{}, dietSel:null, logKey:'ski', delArm:null, histOpen:null, tmode:'full', resetArm:false};
 ui.open[weekOf(ui.sel)]=true;
-try{ var h0=(location.hash||'').slice(1); if(['today','plan','wod','ana','log','timer','diet','guide'].indexOf(h0)>=0) ui.tab=h0; }catch(e){}
+try{ var h0=(location.hash||'').slice(1); if(['today','plan','wod','ana','log','body','timer','diet','guide'].indexOf(h0)>=0) ui.tab=h0; }catch(e){}
 
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 var toastT=null;
@@ -859,7 +866,24 @@ function nextEvent(from){
   for(var n=from+1;n<=PLAN_END;n++){ var s=sessionFor(n); if(s.kind==='test'||s.kind==='sim'||s.kind==='race') return {n:n,s:s}; }
   return null;
 }
+function onboardHtml(){
+  var g=store.goal, G=HX.groups&&HX.groups[g.div+'|'+g.g], gi=goalInfo();
+  var h='<div class="card intro"><span class="eyebrow">하이록스 인천 2027 준비 앱</span><h2 style="font-family:var(--f-display);font-weight:400;font-size:24px;margin:8px 0 4px">환영해요! 목표부터 정해요</h2><p class="muted" style="margin:0 0 12px">인천 2026 실제 결과로 내 목표 기록과 지금 위치를 계산해요. 나중에 홈의 \'목표 바꾸기\'로 언제든 바꿀 수 있어요.</p>';
+  h+='<h3 class="step"><i>1</i>어떤 경기에 나가세요?</h3><div class="sel">';
+  h+='<div class="row"><span class="lab">종목</span><button class="chipbtn'+(g.type==='single'?' on':'')+'" data-gtype="single">싱글 (솔로)</button><button class="chipbtn'+(g.type==='doubles'?' on':'')+'" data-gtype="doubles">더블스</button></div>';
+  h+='<div class="row"><span class="lab">디비전</span>'+DIVS[g.type].map(function(d){ return '<button class="chipbtn'+(g.div===d[0]?' on':'')+'" data-gdiv="'+d[0]+'">'+d[1]+'</button>'; }).join('')+'</div>';
+  h+='<div class="row"><span class="lab">성별</span>'+['M','W','X'].filter(function(x){ return g.type==='doubles'||x!=='X'; }).map(function(x){ var has=!!(HX.groups&&HX.groups[g.div+'|'+x]); return '<button class="chipbtn'+(g.g===x?' on':'')+'" data-ggen="'+x+'"'+(has?'':' disabled')+'>'+GEN[x]+'</button>'; }).join('')+'</div>';
+  if(G){ var ags=Object.keys(G.ags).filter(function(k){ return k!=='ALL'&&k!=='null'&&k!=='–'&&k!=='-'; }); h+='<div class="row"><span class="lab">에이지</span><select id="g-ag" style="flex:1"><option value="ALL"'+(g.ag==='ALL'?' selected':'')+'>전체</option>'+ags.map(function(k){ return '<option value="'+esc(k)+'"'+(g.ag===k?' selected':'')+'>'+esc(k)+(/^\d/.test(k)?'세':'')+'</option>'; }).join('')+'</select></div>'; }
+  h+='</div><h3 class="step"><i>2</i>목표 순위</h3><div class="pctline"><span class="muted">상위</span><input type="number" inputmode="numeric" min="1" max="99" id="g-pct" value="'+g.pct+'"><span class="muted">%</span>'+[10,25,50].map(function(p){ return '<button class="chipbtn'+(g.pct===p?' on':'')+'" data-gpct="'+p+'">'+p+'%</button>'; }).join('')+'</div>';
+  if(gi) h+='<div class="goalbox" style="margin-top:10px"><div class="v"><span>'+esc(goalLabelShort())+'</span><span class="t">→ <b class="num">'+fmtT(gi.T)+'</b></span></div></div>';
+  h+='<h3 class="step"><i>3</i>지금 내 기록 (모르면 비워도 돼요)</h3><div class="grid2"><label class="f">10km 기록<input type="text" inputmode="numeric" data-time="1" id="ob-10k" placeholder="예: 5200 → 52:00"></label><label class="f">체중 kg (식단 계산)<input type="number" inputmode="decimal" step="0.1" id="ob-kg" placeholder="예: 70"></label></div>';
+  h+='<div class="muted" style="margin-top:6px">10km 기록이 없으면 내 예상은 목표 그룹의 중간 기록으로 시작해요. 기록 탭에 측정값을 넣을수록 정확해져요.</div>';
+  h+='<button class="btn pri big" data-act="obdone">시작하기</button>';
+  h+='<div class="row" style="margin-top:10px"><span class="muted">다른 폰에서 쓰던 기록이 있으면</span><span class="sp"></span><button class="btn sm ghost" data-tab-go="body">백업 불러오기 ›</button></div>';
+  return h+'</div>';
+}
 function renderToday(){
+  if(!store.goal.set){ document.getElementById('p-today').innerHTML=onboardHtml(); return; }
   document.getElementById('p-today').innerHTML=goalCardHtml()+goalVsMeHtml();
   wireHist('hchart-home');
 }
@@ -1187,7 +1211,7 @@ function renderLog(){
 /* ---------- diet ---------- */
 function renderDiet(){
   var n=ui.sel, auto=dietType(n), t=ui.dietSel||auto, d=dietFor(t,n);
-  var h='<div class="card sess k-hyrox"><div class="band"><span class="kchip">'+md(n)+' ('+DOWK[dow(n)]+') · 78kg 기준</span><div class="title">'+d.n+'</div></div><div class="sess-body">';
+  var h='<div class="card sess k-hyrox"><div class="band"><span class="kchip">'+md(n)+' ('+DOWK[dow(n)]+') · '+bodyKg()+'kg 기준</span><div class="title">'+d.n+'</div></div><div class="sess-body">';
   h+='<div class="chips">'+['low','mid','high','load'].map(function(x){ return '<button class="chipbtn'+(x===t?' on':'')+'" data-diet="'+x+'">'+({low:'쉬는 날',mid:'훈련일',high:'고강도',load:'로딩'})[x]+(x===auto?' · 오늘':'')+'</button>'; }).join('')+'</div>';
   h+='<div class="tiles"><div class="tile"><div class="l">단백질</div><div class="v">'+d.p+'</div></div><div class="tile"><div class="l">탄수화물</div><div class="v">'+d.c+'</div></div><div class="tile"><div class="l">지방</div><div class="v">'+d.f+'</div></div><div class="tile"><div class="l">열량 (kcal)</div><div class="v">'+d.k+'</div></div></div>';
   if(d.cut) h+='<div class="note" style="margin-top:10px">감량 기간이라 쉬는 날 탄수화물을 밥 한 공기(약 80g) 줄인 값이에요. 훈련일은 줄이지 않아요.</div>';
@@ -1838,11 +1862,12 @@ function splitAt(G,T){
   return o;
 }
 function myCurrent(){
-  var z=est10k(), run=(z.s/10+35)*8;
-  var est={ski:280,push:195,pull:315,bbj:315,row:290,farm:125,lunge:310,wb:410};
-  var o={run:run,rox:420,src:{}}, k;
+  var z=est10k(), run=(z.s/10+35)*8, hasRun=z.src.indexOf('기본값')!==0;
+  var est={ski:280,push:195,pull:315,bbj:315,row:290,farm:125,lunge:310,wb:410}, rox=420;
+  if(store.goal.est!=='owner'){ var gi=goalInfo(), m=gi?splitAt(gi.G,quant(gi.A.t,.5)):null; if(m){ for(var k0 in est) est[k0]=m[k0]; rox=m.rox; if(!hasRun) run=m.run; } }
+  var o={run:run,rox:rox,src:{}}, k;
   for(k in est){ var b=best(k); o[k]=b?b.s:est[k]; o.src[k]=b?'측정':'추정'; }
-  o.src.run=z.src.indexOf('기본값')===0?'추정':'측정'; o.src.rox='추정';
+  o.src.run=hasRun?'측정':'추정'; o.src.rox='추정';
   o.stations=0; for(k in est) o.stations+=o[k];
   o.total=o.run+o.stations+o.rox;
   return o;
@@ -1979,7 +2004,7 @@ function goalCardHtml(){
   var gi=goalInfo(), g=store.goal;
   var h='<div class="card intro"><span class="eyebrow">하이록스 인천 2027 준비 앱</span>';
   h+='<p style="margin:6px 0 10px">목표를 정하면 지금 내 위치와 줄여야 할 시간을 보여 주는 개인 훈련 앱이에요.</p>';
-  h+='<div class="appinfo"><div>업데이트 '+APP_INFO.ver+' · 제작 '+esc(APP_INFO.by)+'</div><div>기록 데이터: HYROX 인천 2026 (5/15–17) 결과 · '+esc(HX.src||'Hyranking 집계')+'</div></div>';
+  h+='<div class="appinfo"><div>업데이트 '+APP_INFO.ver+' · 제작 '+esc(APP_INFO.by)+' · <a href="'+manualUrl()+'" target="_blank" rel="noopener">사용 설명서</a></div><div>기록 데이터: HYROX 인천 2026 (5/15–17) 결과 · '+esc(HX.src||'Hyranking 집계')+'</div></div>';
   h+='<div class="goalbox"><div class="gh"><span class="l">내 목표</span><button class="btn sm" data-act="goaledit">'+(ui.goalEdit?'닫기':'목표 바꾸기')+'</button></div><div class="v"><span>'+esc(goalLabelShort())+'</span>'+(gi?'<span class="t">→ <b class="num">'+fmtT(gi.T)+'</b></span>':'')+'</div></div>';
   if(ui.goalEdit){
     var G=HX.groups&&HX.groups[g.div+'|'+g.g];
@@ -2122,6 +2147,12 @@ document.addEventListener('click',function(e){
     store.tests=store.tests.concat([{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),k:(tm.mode==='full'||(tm.segs&&tm.segs.length===16&&tm.mode!=='short'))?'full':'half',d:key(TODAY),s:tot,splits:sp,mode:tm.mode}]);
     saveTests(); tm.saved=true; saveTimer(); toast('기록에 저장했어요 · '+fmtT(tot)); render(); return;
   }
+  if(a==='obdone'){
+    var t10=parseT((document.getElementById('ob-10k')||{}).value), kgv=parseFloat((document.getElementById('ob-kg')||{}).value);
+    store.goal.set=true; store.goal.est='group'; if(kgv>30&&kgv<200) store.goal.kg=Math.round(kgv*10)/10;
+    if(t10){ store.tests=store.tests.concat([{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),k:'10k',d:key(TODAY),s:t10,raw:{mode:'std',qa:10000,ta:t10}}]); saveTests(); }
+    saveGoal(); syncAnaToGoal(); toast('목표를 정했어요. 화이팅!'); render(); window.scrollTo(0,0); return;
+  }
   if(a==='goaledit'){ ui.goalEdit=!ui.goalEdit; render(); return; }
   if(a==="woadd"){ readWoForm(); ui.wo.ex.push({n:"",st:""}); render(); return; }
   if(a==="woreset"){ ui.wo=blankWo(); PHW=[]; ui.phw.msg=""; render(); return; }
@@ -2263,6 +2294,8 @@ if(IS_PWA){
   try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(function(){}); }catch(e){}
 }
 loadLocal();
+ensureGoalSet();
+try{ if(/[?&]demo=1/.test(location.search)) store.goal.set=true; }catch(e){}   // 설명서 캡처용 미리보기 (저장 안 함)
 syncAnaToGoal();
 loadTimer();
 render();
