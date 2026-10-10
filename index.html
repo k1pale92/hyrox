@@ -1429,24 +1429,39 @@ function myCurrent(){
   return o;
 }
 // 총 기록 분포: x = 5분 구간, y = 그 구간에 든 비율(%)
-function histSvg(arr,marks){
+// 총 기록 분포: x = 5분 구간, y = 그 구간에 든 비율(%)
+// bg(전체)가 있으면 뒤에 엷게, arr(선택 에이지)는 앞에 뚜렷하게. 둘 다 각자 인원 대비 %.
+function histSvg(arr,marks,bg){
   if(!arr||arr.length<3) return '<div class="muted">인원이 적어 분포 그래프를 그리지 않아요.</div>';
-  var n=arr.length, lo=Math.floor(quant(arr,0.0)/300)*300, hi=Math.ceil(quant(arr,0.98)/300)*300; if(hi-lo<1800) hi=lo+1800;
-  var bw=300, nb=Math.round((hi-lo)/bw), bins=new Array(nb).fill(0);
-  arr.forEach(function(t){ var i=Math.floor((t-lo)/bw); if(i>=nb) i=nb-1; bins[Math.max(0,i)]++; });
-  var pc=bins.map(function(c){ return c/n*100; }), mxp=Math.max.apply(null,pc), step=mxp>20?10:mxp>10?5:mxp>4?2:1, top=Math.ceil(mxp/step)*step;
+  var both=bg?arr.concat(bg):arr;
+  var lo=Math.floor(Math.min(quant(arr,0),bg?quant(bg,0):Infinity)/300)*300, hi=Math.ceil(Math.max(quant(arr,0.98),bg?quant(bg,0.98):0)/300)*300; if(hi-lo<1800) hi=lo+1800;
+  var bw=300, nb=Math.round((hi-lo)/bw);
+  function binPct(a){ var b=new Array(nb).fill(0); a.forEach(function(t){ var i=Math.floor((t-lo)/bw); if(i>=nb) i=nb-1; b[Math.max(0,i)]++; }); return {c:b,p:b.map(function(c){ return c/a.length*100; })}; }
+  var F=binPct(arr), B=bg?binPct(bg):null;
+  var mxp=Math.max.apply(null,F.p.concat(B?B.p:[])), step=mxp>20?10:mxp>10?5:mxp>4?2:1, top=Math.ceil(mxp/step)*step;
   var X0=34,X1=334,Y0=22,Y1=112, w=(X1-X0)/nb;
   function x(t){ return X0+(t-lo)/(hi-lo)*(X1-X0); } function y(p){ return Y1-p/top*(Y1-Y0); }
+  function bar(i,p,inset,fill,op){ var hgt=Y1-y(p); if(hgt<=0) return ''; var x0=X0+i*w+inset, x1=X0+(i+1)*w-inset; if(x1-x0<3) x1=x0+3; var r=Math.min(2,(x1-x0)/2,hgt/2);
+    return '<path d="M'+x0.toFixed(1)+' '+Y1+' V'+(Y1-hgt+r).toFixed(1)+' q0 -'+r+' '+r+' -'+r+' H'+(x1-r).toFixed(1)+' q'+r+' 0 '+r+' '+r+' V'+Y1+' Z" fill="'+fill+'" fill-opacity="'+op+'"/>'; }
   var s='';
   for(var v=0;v<=top+1e-9;v+=step) s+='<line x1="'+X0+'" x2="'+X1+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)"/><text x="'+(X0-4)+'" y="'+(y(v)+3)+'" text-anchor="end">'+v+'%</text>';
-  pc.forEach(function(p,i){ var hgt=Y1-y(p); if(bins[i]) s+='<path d="M'+(X0+i*w+1)+' '+Y1+' V'+(Y1-hgt+2)+' q0 -2 2 -2 H'+(X0+(i+1)*w-3)+' q2 0 2 2 V'+Y1+' Z" fill="var(--c-run)" fill-opacity=".8"/>'; s+='<rect class="hb" data-a="'+(lo+i*bw)+'" data-c="'+bins[i]+'" data-p="'+p.toFixed(1)+'" data-cum="'+(pc.slice(0,i+1).reduce(function(a,b){ return a+b; },0)).toFixed(0)+'" x="'+(X0+i*w)+'" y="'+Y0+'" width="'+w+'" height="'+(Y1-Y0)+'" fill="transparent"/>'; });
+  if(B) B.p.forEach(function(p,i){ s+=bar(i,p,0.5,'var(--muted)',.28); });
+  var cumF=0, cumB=0;
+  F.p.forEach(function(p,i){
+    s+=bar(i,p,B?2.5:1,'var(--c-run)',B?.95:.8);
+    cumF+=p; if(B) cumB+=B.p[i];
+    s+='<rect class="hb" data-a="'+(lo+i*bw)+'" data-c="'+F.c[i]+'" data-p="'+p.toFixed(1)+'" data-cum="'+cumF.toFixed(0)+'"'+(B?' data-bp="'+B.p[i].toFixed(1)+'" data-bcum="'+cumB.toFixed(0)+'"':'')+' x="'+(X0+i*w)+'" y="'+Y0+'" width="'+w+'" height="'+(Y1-Y0)+'" fill="transparent"/>';
+  });
   for(var t=lo;t<=hi;t+=(hi-lo>5400?1800:900)) s+='<text x="'+x(t)+'" y="'+(Y1+12)+'" text-anchor="middle">'+fmtT(t).replace(/:00$/,'')+'</text>';
   (marks||[]).forEach(function(m,j){ if(m.t<lo||m.t>hi) return; var ly=Y0-6-(j%2)*10; s+='<line x1="'+x(m.t)+'" x2="'+x(m.t)+'" y1="'+(ly+2)+'" y2="'+Y1+'" stroke="'+m.c+'" stroke-width="2" stroke-dasharray="'+(m.dash||'0')+'"/><text x="'+Math.max(X0+20,Math.min(X1-20,x(m.t)))+'" y="'+ly+'" text-anchor="middle" style="fill:var(--ink);font-weight:600">'+m.l+'</text>'; });
-  return '<div class="chart" id="hchart"><svg viewBox="0 0 340 128" role="img" aria-label="총 기록 분포 (구간별 비율)">'+s+'</svg><div class="tip" hidden></div></div>';
+  var leg=B?'<div class="legend"><span><i style="background:var(--c-run)"></i>'+esc(bg.label||'선택 에이지')+'</span><span><i style="background:var(--muted);opacity:.4"></i>전체</span></div>':'';
+  return leg+'<div class="chart" id="hchart"><svg viewBox="0 0 340 128" role="img" aria-label="총 기록 분포 (구간별 비율)'+(B?', 전체 분포와 비교':'')+'">'+s+'</svg><div class="tip" hidden></div></div>';
 }
 function wireHist(){
   var c=document.getElementById('hchart'); if(!c) return; var tip=c.querySelector('.tip');
-  function show(e){ var t=e.target.closest('.hb'); if(!t){ tip.hidden=true; return; } var a=Number(t.dataset.a), b=t.getBoundingClientRect(), cr=c.getBoundingClientRect(); tip.innerHTML=fmtT(a)+'–'+fmtT(a+300)+' · <b>'+t.dataset.p+'%</b> ('+t.dataset.c+'명)<br>여기까지 누적 상위 '+t.dataset.cum+'%'; tip.style.left=Math.max(70,Math.min(cr.width-70,b.left+b.width/2-cr.left))+'px'; tip.style.top=(b.top-cr.top+30)+'px'; tip.hidden=false; }
+  function show(e){ var t=e.target.closest('.hb'); if(!t){ tip.hidden=true; return; } var a=Number(t.dataset.a), b=t.getBoundingClientRect(), cr=c.getBoundingClientRect();
+    tip.innerHTML=fmtT(a)+'–'+fmtT(a+300)+'<br>선택 <b>'+t.dataset.p+'%</b> ('+t.dataset.c+'명) · 누적 상위 '+t.dataset.cum+'%'+(t.dataset.bp!=null?'<br>전체 <b>'+t.dataset.bp+'%</b> · 누적 상위 '+t.dataset.bcum+'%':'');
+    tip.style.left=Math.max(80,Math.min(cr.width-80,b.left+b.width/2-cr.left))+'px'; tip.style.top=(b.top-cr.top+40)+'px'; tip.hidden=false; }
   c.addEventListener('pointermove',show); c.addEventListener('pointerdown',show); c.addEventListener('pointerleave',function(){ tip.hidden=true; });
 }
 // 기록 T가 그룹에서 상위 몇 %인지 (T보다 빠르거나 같은 비율)
@@ -1481,7 +1496,7 @@ function renderAna(){
   h+='<div class="card"><div class="kpis"><div class="kpi"><div class="l">인원</div><div class="v">'+A.n+'</div></div><div class="kpi"><div class="l">상위 25%</div><div class="v">'+fmtT(quant(ts,.25))+'</div></div><div class="kpi"><div class="l">중간</div><div class="v">'+fmtT(quant(ts,.5))+'</div></div>'+(showMe?'<div class="kpi" style="background:var(--hot-soft)"><div class="l">내 예상</div><div class="v">상위 '+myPct+'%</div></div>':'<div class="kpi"><div class="l">상위 10%</div><div class="v">'+fmtT(quant(ts,.1))+'</div></div>')+'</div>';
   var marks=[{t:quant(ts,.25),l:'상위 25%',c:'var(--ok)'}];
   if(showMe) marks.push({t:mc.total,l:'나 '+fmtT(mc.total)+' · 상위 '+myPct+'%',c:'var(--hot)',dash:'4 3'});
-  h+='<h3 style="font-size:14px;margin:14px 0 4px">총 기록 분포 · '+esc(agName)+'</h3><div class="muted" style="margin-bottom:4px">가로: 5분 구간 · 세로: 그 구간에 든 비율. 막대를 누르면 누적 순위가 보여요.</div>'+histSvg(ts,marks);
+  h+='<h3 style="font-size:14px;margin:14px 0 4px">총 기록 분포 · '+esc(agName)+'</h3><div class="muted" style="margin-bottom:4px">가로: 5분 구간 · 세로: 그 구간에 든 비율. 막대를 누르면 누적 순위가 보여요.</div>'+histSvg(ts,marks,a.ag!=='ALL'?Object.assign(G.ags.ALL.t.slice(),{label:agName}):null);
   if(showMe) h+='<div class="muted" style="margin-top:6px">내 예상 '+fmtT(mc.total)+' = 러닝 '+fmtT(mc.run)+' (10km 기록 기준) + 스테이션 '+fmtT(mc.stations)+' + 록스존 '+fmtT(mc.rox)+'. 기록 탭에 측정값을 넣을수록 정확해져요.</div>';
   h+='</div>';
 
