@@ -246,12 +246,13 @@ tr.tot td{font-weight:700;background:var(--chip)}
 tr.cur td{background:var(--accent-soft)}
 
 /* home */
-.goalbox{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;background:var(--accent-soft);border-radius:14px;padding:10px 12px}
-.goalbox .l{font-size:11px;color:var(--muted);letter-spacing:.06em;grid-column:1}
-.goalbox .v{font-weight:700;font-size:15px;grid-column:1}
-.goalbox .t{grid-column:1;font-size:13px}
+.goalbox{display:flex;flex-direction:column;gap:4px;background:var(--accent-soft);border-radius:14px;padding:10px 12px}
+.goalbox .gh{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.goalbox .l{font-size:13px;color:var(--muted);letter-spacing:.04em;font-weight:600}
+.goalbox .v{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.goalbox .t{font-size:14px}
 .goalbox .t b{font-size:17px;color:var(--accent)}
-.goalbox .btn{grid-column:2;grid-row:1/4}
+@media (max-width:360px){ .goalbox .v{font-size:14px} }
 .gaplist{display:flex;flex-direction:column;gap:6px}
 .gapr{display:flex;align-items:baseline;gap:8px;flex-wrap:nowrap;white-space:nowrap;background:var(--chip);border-radius:10px;padding:8px 11px;min-width:0}
 .gapr .s{overflow:hidden;text-overflow:ellipsis}
@@ -1964,13 +1965,14 @@ var PHASE_PLAN=[
 function phaseDates(p){ var s=p.a<=0?PLAN_START:weekStart(p.a), e=p.b<=0?W1-1:weekStart(p.b)+6; return [s,Math.min(e,PLAN_END)]; }
 function syncAnaToGoal(){ var g=store.goal; ui.ana.type=g.type; ui.ana.div=g.div; ui.ana.g=g.g; ui.ana.ag=g.ag; ui.ana.pct=g.pct; }
 function goalLabel(g){ g=g||store.goal; var dv=(DIVS[g.type]||[]).filter(function(d){ return d[0]===g.div; })[0]; return (g.type==='single'?'싱글':'더블스')+' · '+(dv?dv[1]:'')+' · '+GEN[g.g]+' · '+(g.ag==='ALL'?'전체 에이지':g.ag+(/^\d/.test(g.ag)?'세':''))+' · 상위 '+g.pct+'%'; }
+function goalLabelShort(g){ g=g||store.goal; var dv=(DIVS[g.type]||[]).filter(function(d){ return d[0]===g.div; })[0]; return [(g.type==='single'?'싱글':'더블스'),(dv?dv[1]:''),GEN[g.g],(g.ag==='ALL'?'전체':g.ag.replace('-','~')+(/^\d/.test(g.ag)?'세':'')),'상위 '+g.pct+'%'].join('·'); }
 function goalInfo(){ var g=store.goal, G=HX.groups&&HX.groups[g.div+'|'+g.g]; if(!G) return null; var A=G.ags[g.ag]||G.ags.ALL; return {g:g,G:G,A:A,T:quant(A.t,g.pct/100)}; }
 ui.goalEdit=false;
 function goalCardHtml(){
   var gi=goalInfo(), g=store.goal;
   var h='<div class="card intro"><span class="eyebrow">하이록스 인천 2027 준비 앱</span>';
   h+='<p style="margin:6px 0 12px">2027년 5월 인천 대회까지 <b>31주 훈련 계획</b>, <b>애틀릭스 WOD 기록</b>, <b>인천 2026 실제 결과 분석</b>을 한곳에서 연결해요. 기록이 쌓일수록 내 예상 순위와 목표 배정이 자동으로 정확해져요.</p>';
-  h+='<div class="goalbox"><div class="l">내 목표</div><div class="v">'+esc(goalLabel())+'</div>'+(gi?'<div class="t">→ <b class="num">'+fmtT(gi.T)+'</b> 이내</div>':'')+'<button class="btn sm" data-act="goaledit">'+(ui.goalEdit?'닫기':'목표 바꾸기')+'</button></div>';
+  h+='<div class="goalbox"><div class="gh"><span class="l">내 목표</span><button class="btn sm" data-act="goaledit">'+(ui.goalEdit?'닫기':'목표 바꾸기')+'</button></div><div class="v">'+esc(goalLabelShort())+'</div>'+(gi?'<div class="t">→ <b class="num">'+fmtT(gi.T)+'</b> 이내</div>':'')+'</div>';
   if(ui.goalEdit){
     var G=HX.groups&&HX.groups[g.div+'|'+g.g];
     h+='<div class="sel" style="margin-top:12px">';
