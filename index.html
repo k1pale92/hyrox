@@ -247,10 +247,13 @@ tr.cur td{background:var(--accent-soft)}
 
 /* home */
 .goalbox{display:flex;flex-direction:column;gap:4px;background:var(--accent-soft);border-radius:14px;padding:10px 12px}
+.appinfo{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:12.5px;color:var(--muted);margin:-4px 0 12px}
+.appinfo span+span::before{content:'·';margin-right:10px;color:var(--line)}
 .goalbox .gh{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .goalbox .l{font-size:13px;color:var(--muted);letter-spacing:.04em;font-weight:600}
 .goalbox .v{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.goalbox .t{font-size:14px}
+.goalbox .t{font-weight:400}
+.goalbox .t b{color:var(--accent)}
 .goalbox .t b{font-size:17px;color:var(--accent)}
 @media (max-width:360px){ .goalbox .v{font-size:14px} }
 .gaplist{display:flex;flex-direction:column;gap:6px}
@@ -703,6 +706,7 @@ function dietFor(type,n){
 
 /* ---------- store ---------- */
 var LSK='hyrox-incheon-2027-v1';
+var APP_INFO={ver:'2026.10.11',by:'@81ondal'};
 var GOAL0={type:'single',div:'hyrox-open',g:'M',ag:'45-49',pct:25};
 var store={mode:'local',days:{},tests:[],body:[],wods:[],workouts:[],goal:Object.assign({},GOAL0)};
 var col=null, chains={};
@@ -1965,6 +1969,8 @@ var PHASE_PLAN=[
 function phaseDates(p){ var s=p.a<=0?PLAN_START:weekStart(p.a), e=p.b<=0?W1-1:weekStart(p.b)+6; return [s,Math.min(e,PLAN_END)]; }
 function syncAnaToGoal(){ var g=store.goal; ui.ana.type=g.type; ui.ana.div=g.div; ui.ana.g=g.g; ui.ana.ag=g.ag; ui.ana.pct=g.pct; }
 function goalLabel(g){ g=g||store.goal; var dv=(DIVS[g.type]||[]).filter(function(d){ return d[0]===g.div; })[0]; return (g.type==='single'?'싱글':'더블스')+' · '+(dv?dv[1]:'')+' · '+GEN[g.g]+' · '+(g.ag==='ALL'?'전체 에이지':g.ag+(/^\d/.test(g.ag)?'세':''))+' · 상위 '+g.pct+'%'; }
+// km당 페이스를 러닝 앱 표기로: 5'03"
+function paceQ(sec){ sec=Math.round(sec); return Math.floor(sec/60)+"'"+String(sec%60).padStart(2,'0')+'"'; }
 function goalLabelShort(g){ g=g||store.goal; var dv=(DIVS[g.type]||[]).filter(function(d){ return d[0]===g.div; })[0]; return [(g.type==='single'?'싱글':'더블스'),(dv?dv[1]:''),GEN[g.g],(g.ag==='ALL'?'전체':g.ag.replace('-','~')+(/^\d/.test(g.ag)?'세':'')),'상위 '+g.pct+'%'].join('·'); }
 function goalInfo(){ var g=store.goal, G=HX.groups&&HX.groups[g.div+'|'+g.g]; if(!G) return null; var A=G.ags[g.ag]||G.ags.ALL; return {g:g,G:G,A:A,T:quant(A.t,g.pct/100)}; }
 ui.goalEdit=false;
@@ -1972,7 +1978,8 @@ function goalCardHtml(){
   var gi=goalInfo(), g=store.goal;
   var h='<div class="card intro"><span class="eyebrow">하이록스 인천 2027 준비 앱</span>';
   h+='<p style="margin:6px 0 12px">2027년 5월 인천 대회까지 <b>31주 훈련 계획</b>, <b>애틀릭스 WOD 기록</b>, <b>인천 2026 실제 결과 분석</b>을 한곳에서 연결해요. 기록이 쌓일수록 내 예상 순위와 목표 배정이 자동으로 정확해져요.</p>';
-  h+='<div class="goalbox"><div class="gh"><span class="l">내 목표</span><button class="btn sm" data-act="goaledit">'+(ui.goalEdit?'닫기':'목표 바꾸기')+'</button></div><div class="v">'+esc(goalLabelShort())+'</div>'+(gi?'<div class="t">→ <b class="num">'+fmtT(gi.T)+'</b> 이내</div>':'')+'</div>';
+  h+='<div class="appinfo"><span>업데이트 '+APP_INFO.ver+'</span><span>제작 '+esc(APP_INFO.by)+'</span><span>기록 데이터: '+esc(HX.event||'HYROX 인천 2026')+' 결과 ('+esc(HX.src||'Hyranking')+', '+esc(HX.fetched||'')+' 수집)</span></div>';
+  h+='<div class="goalbox"><div class="gh"><span class="l">내 목표</span><button class="btn sm" data-act="goaledit">'+(ui.goalEdit?'닫기':'목표 바꾸기')+'</button></div><div class="v">'+esc(goalLabelShort())+(gi?' <span class="t">→ <b class="num">'+fmtT(gi.T)+'</b></span>':'')+'</div></div>';
   if(ui.goalEdit){
     var G=HX.groups&&HX.groups[g.div+'|'+g.g];
     h+='<div class="sel" style="margin-top:12px">';
@@ -1999,7 +2006,7 @@ function goalVsMeHtml(){
     var rows=[['러닝 8km',o.run,mc.run],['스테이션 8개',o.stations,mc.stations],['록스존',o.rox,mc.rox]];
     h+='<h3 style="font-size:15px;margin:14px 0 6px">항목별 차이</h3><div class="gaplist">'+rows.map(function(r,i){ var d=r[2]-r[1], dv='<span class="v '+(d<=0?'good':'bad')+'">'+(d<=0?'✓ '+fmtT(-d):'−'+fmtT(d))+'</span>';
       // 러닝은 2줄: 차이 / 목표·나 총시간과 km당 페이스. 스테이션·록스존은 1줄
-      if(i===0) return '<div class="gapr run"><div class="top"><span class="l">'+r[0]+'</span>'+dv+'</div><div class="s">목표 '+fmtT(r[1])+' ('+fp(r[1]/8)+'/km) · 나 '+fmtT(r[2])+' ('+fp(r[2]/8)+'/km)</div></div>';
+      if(i===0) return '<div class="gapr"><span class="l">러닝</span>'+dv+'<span class="s">(목표 '+fmtT(r[1])+'·'+paceQ(r[1]/8)+' / 나 '+fmtT(r[2])+'·'+paceQ(r[2]/8)+')</span></div>';
       return '<div class="gapr"><span class="l">'+r[0]+'</span>'+dv+'<span class="s">(목표 '+fmtT(r[1])+' · 나 '+fmtT(r[2])+')</span></div>'; }).join('')+'</div>';
     var det=[['러닝',o.run,mc.run],['스키에르그',o.ski,mc.ski],['슬레드 푸시',o.push,mc.push],['슬레드 풀',o.pull,mc.pull],['버피 브로드 점프',o.bbj,mc.bbj],['로잉',o.row,mc.row],['파머스 캐리',o.farm,mc.farm],['샌드백 런지',o.lunge,mc.lunge],['월볼',o.wb,mc.wb],['록스존',o.rox,mc.rox]].map(function(r){ return [r[0],r[2]-r[1]]; }).sort(function(a,b){ return b[1]-a[1]; });
     var big=det.filter(function(d){ return d[1]>10; }).slice(0,3), ok=det.filter(function(d){ return d[1]<=0; }).map(function(d){ return d[0]; });
