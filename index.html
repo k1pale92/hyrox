@@ -299,7 +299,7 @@ h3.step i{font-style:normal;width:22px;height:22px;border-radius:50%;display:inl
 .segcfg input[type=text]{padding:6px 8px;font-size:14px}
 .segcfg .run{color:var(--muted)}
 
-/* 내운동 · 태그 색 (검증된 기본 팔레트 순서) */
+/* 운동기록 · 태그 색 (검증된 기본 팔레트 순서) */
 :root{--t-pt:#2a78d6;--t-weight:#eb6834;--t-lsd:#1baf7a;--t-interval:#eda100;--t-hyrox:#e87ba4;--t-sc:#008300;--t-event:#4a3aa7}
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--t-pt:#3987e5;--t-weight:#d95926;--t-lsd:#199e70;--t-interval:#c98500;--t-hyrox:#d55181;--t-sc:#008300;--t-event:#9085e9} }
 :root[data-theme="dark"]{--t-pt:#3987e5;--t-weight:#d95926;--t-lsd:#199e70;--t-interval:#c98500;--t-hyrox:#d55181;--t-sc:#008300;--t-event:#9085e9}
@@ -348,7 +348,7 @@ h3.step i{font-style:normal;width:22px;height:22px;border-radius:50%;display:inl
 .li .ld{font-size:12.5px;color:var(--muted);white-space:nowrap}
 .li .lt{min-width:0} .li .lt b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .li .lt span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .li .ls{font-size:12px;color:var(--ok);white-space:nowrap}
-/* 내운동 효과 · 게임 스탯 카드 */
+/* 운동효과 · 게임 스탯 카드 */
 .game{background:linear-gradient(160deg,#0b0f2e,#1d1457 60%,#2a1150);color:#eef0ff;border-radius:20px;padding:14px;box-shadow:0 18px 40px -22px rgba(60,40,160,.8);position:relative;overflow:hidden}
 .game::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px);pointer-events:none}
 .game>*{position:relative}
@@ -554,8 +554,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <nav class="tabs" aria-label="메뉴"><div class="tabs-in">
   <button class="tab on" data-tab="today"><svg viewBox="0 0 24 24"><path d="M4 11l8-6.5 8 6.5"/><path d="M6.5 9.5V19h11V9.5M10 19v-5h4v5"/></svg>홈</button>
   <button class="tab" data-tab="ana"><svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V8M14 20v-9M19 20V4"/></svg>분석</button>
-  <button class="tab" data-tab="plan"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>내운동</button>
-  <button class="tab" data-tab="wod"><svg viewBox="0 0 24 24"><path d="M4 18l5-6 4 3 7-9"/><path d="M15 6h5v5"/></svg>내운동 효과</button>
+  <button class="tab" data-tab="plan"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>운동기록</button>
+  <button class="tab" data-tab="wod"><svg viewBox="0 0 24 24"><path d="M4 18l5-6 4 3 7-9"/><path d="M15 6h5v5"/></svg>운동효과</button>
   <button class="tab" data-tab="timer"><svg viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5V9.5M10 3h4M18.5 6.5l1.5-1.5"/></svg>시뮬레이션</button>
   <button class="tab" data-tab="guide"><svg viewBox="0 0 24 24"><path d="M5 4h10l4 4v12H5z"/><path d="M9 12h6M9 16h6"/></svg>가이드</button>
   <button class="tab" data-tab="me"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.8-4 3.8-6 7.5-6s6.7 2 7.5 6"/></svg>내정보</button>
@@ -632,13 +632,13 @@ function sessionFor(n){
   }
   // 10월: 기초 데이터 수집 (평소 운동 + 기록 · 측정). 본격 훈련은 11/2(4주차)부터
   if(w>=1&&w<=3){
-    var wodS=S('hyrox','애틀릭스 WOD + 기록',['평소처럼 애틀릭스 수업 참여','내운동 → 기록 카드에 사진으로 남기기'],0);
+    var wodS=S('hyrox','애틀릭스 WOD + 기록',['평소처럼 애틀릭스 수업 참여','운동기록 → 기록 카드에 사진으로 남기기'],0);
     return [wodS,
       w===1?S('test','5km 측정',['워밍업 2km','5km 기록 측정 (트랙 또는 평지)','쿨다운 1km'],8,{tests:['5k']})
-      :w===2?S('easy','이지런 8km + 심박 기록',['편한 페이스로 8km','러닝 앱 화면을 내운동 기록 카드에 사진으로'],8,{pace:'easy'})
+      :w===2?S('easy','이지런 8km + 심박 기록',['편한 페이스로 8km','러닝 앱 화면을 운동기록 카드에 사진으로'],8,{pace:'easy'})
       :S('test','10km 측정',['워밍업 2km','10km 기록 측정 (기준 기록)','기록이 나오면 페이스 자동 갱신'],12,{tests:['10k']}),
       wodS,
-      S('strength','웨이트 + 기록',['평소 웨이트 루틴 그대로','짐워크 화면을 내운동 기록 카드에 사진으로']),
+      S('strength','웨이트 + 기록',['평소 웨이트 루틴 그대로','짐워크 화면을 운동기록 카드에 사진으로']),
       S('rest','휴식',['체중: 아침 공복 · 저녁 취침 전 기록']),
       w===1?S('test','측정 보완 — 에르그 · 월볼',['10/7에 못 잰 종목만: 스키 1000m · 로잉 1000m · 월볼 100개'],0,{tests:['ski','row','wb']})
       :w===2?S('test','측정 보완 — 슬레드 · 캐리',['10/10에 못 잰 종목만: 슬레드 푸시 · 풀 · 버피 브로드 점프 · 파머스 캐리 · 런지'],0,{tests:['push','pull','bbj','farm','lunge']})
@@ -834,8 +834,9 @@ function dietFor(type,n){
 var LSK='hyrox-incheon-2027-v1';
 var APP_INFO={ver:'2026.10.11',by:'@81ondal',url:'https://k1pale92.github.io/hyrox/',manual:'https://k1pale92.github.io/hyrox/manual.html'};
 var CHANGES=[
+  ['2026.10.11','하단 탭 이름: 운동기록 · 운동효과'],
   ['2026.10.11','앱 이름 하이록스훈련 · 새 아이콘 · 내정보 탭'],
-  ['2026.10.11','내운동: +계획/+기록 가운데, 운동 종류별 모양, 필터 전체 선택/해제'],
+  ['2026.10.11','운동기록: +계획/+기록 가운데, 운동 종류별 모양, 필터 전체 선택/해제'],
   ['2026.10.11','내 예상 수준: 근거 전체 폭 · 종목별 최고 기록 한 화면'],
   ['2026.10.10','+계획(특정일 · 주간 · 월간 반복), LV 근거, 내 예상 수준']
 ];
@@ -1254,7 +1255,7 @@ function renderTimer(){
   }
   if(finished){
     var saved=!!tm.saved;
-    h+='<button class="btn '+(saved?'okb':'pri')+' big" data-act="tsave"'+(saved?' disabled':'')+'>'+(saved?'✓ 기록에 저장함':'내운동에 기록 저장')+'</button>';
+    h+='<button class="btn '+(saved?'okb':'pri')+' big" data-act="tsave"'+(saved?' disabled':'')+'>'+(saved?'✓ 기록에 저장함':'운동기록에 기록 저장')+'</button>';
   }
   if(tm && tm.splits.length){
     h+='<div class="card"><h2>구간 기록</h2><div class="tbl"><table><tr><th>구간</th><th class="n">기록</th><th class="n">목표</th><th class="n">차이</th></tr>';
@@ -1375,7 +1376,7 @@ function renderGuide(){
   var runSum=o?o.run:2550, stSum=o?o.stations:2080, rox=o?o.rox:320;
   var h='<div class="card"><h2>목표 구간 기록 · '+fmtT(runSum+stSum+rox)+'</h2><div class="muted" style="margin-bottom:8px">'+(gi?esc(goalLabel())+' 목표를 그 기록대 선수들의 실제 배분으로 나눈 값이에요.':'')+'</div><div class="tbl"><table><tr><th class="n">#</th><th>구간</th><th class="n">목표</th><th>메모</th></tr>'+SPL.map(function(r,j){ return '<tr><td class="n">'+(j+1)+'</td><td>'+r[0]+'</td><td class="n">'+fmtT(segT[j])+'</td><td>'+r[2]+'</td></tr>'; }).join('')+
     '<tr class="tot"><td></td><td>러닝 합계</td><td class="n">'+fmtT(runSum)+'</td><td>'+fp(runSum/8)+'/km</td></tr><tr class="tot"><td></td><td>스테이션 합계</td><td class="n">'+fmtT(stSum)+'</td><td></td></tr><tr class="tot"><td></td><td>록스존</td><td class="n">'+fmtT(rox)+'</td><td>이동 16번</td></tr></table></div></div>';
-  h+='<div class="card"><h2>러닝 페이스</h2><div class="muted">기준: '+esc(z.src)+' · 내운동 효과 → 측정 기록에 5km · 10km를 넣으면 자동으로 바뀌어요.</div><div class="tbl" style="margin-top:8px"><table><tr><th>강도</th><th class="n">/km</th><th class="n">심박</th><th>용도</th></tr>'+
+  h+='<div class="card"><h2>러닝 페이스</h2><div class="muted">기준: '+esc(z.src)+' · 운동효과 → 측정 기록에 5km · 10km를 넣으면 자동으로 바뀌어요.</div><div class="tbl" style="margin-top:8px"><table><tr><th>강도</th><th class="n">/km</th><th class="n">심박</th><th>용도</th></tr>'+
     '<tr><td>이지 (Z2)</td><td class="n">'+zr(z.easy)+'</td><td class="n">125–145</td><td>이지런 · 롱런, 주간의 75~80%</td></tr>'+
     '<tr><td>역치</td><td class="n">'+zr(z.thr)+'</td><td class="n">155–163</td><td>템포 · 1km 반복</td></tr>'+
     '<tr><td>인터벌</td><td class="n">'+zr(z.int)+'</td><td class="n">165+</td><td>800m 반복</td></tr>'+
@@ -2182,7 +2183,7 @@ function goalVsMeHtml(){
   return h+'</div>';
 }
 
-/* ---------- 내운동: 월간 계획 타임라인 · 달력 · 일정 · 기록 카드 ---------- */
+/* ---------- 운동기록: 월간 계획 타임라인 · 달력 · 일정 · 기록 카드 ---------- */
 var TAGS=[['pt','PT'],['weight','웨이트'],['lsd','LSD러닝'],['interval','인터벌러닝'],['hyrox','HYROX'],['sc','S&C'],['event','이벤트']];
 var TAGN={}; TAGS.forEach(function(t){ TAGN[t[0]]=t[1]; });
 var TAGG={pt:['◆','◇'],weight:['■','□'],lsd:['●','○'],interval:['▲','△'],hyrox:['★','☆'],sc:['✚','✙'],event:['⚑','⚐']};
@@ -2389,7 +2390,7 @@ function autoReadCard(files){
   p.then(function(){ ui.evcMsg='읽었어요. 확인 후 저장'; render(); }).catch(function(e){ ui.evcMsg=e&&e.code==='not_granted'?'Claude 사용이 허용되지 않았어요':'읽지 못했어요'; render(); });
 }
 
-/* ---------- 내운동 효과: 스탯 카드 · 개선 효과 · 측정 · 체중 ---------- */
+/* ---------- 운동효과: 스탯 카드 · 개선 효과 · 측정 · 체중 ---------- */
 var STATN={run:'러닝',ski:'스키',push:'푸시',pull:'풀',bbj:'버피',row:'로잉',farm:'파머스',lunge:'런지',wb:'월볼'};
 function dailyLoads(){ var m={}; store.events.forEach(function(e){ if(!e.done) return; var f=evEffect(e); if(!m[e.d]) m[e.d]=zeroEff(); for(var k in f) m[e.d][k]+=f[k]; }); return m; }
 // 체력(42일) · 피로(7일) 지수 평균 — 훈련 부하 관리에 흔히 쓰는 방식
@@ -2458,7 +2459,7 @@ var OWNER_PROF={height:null,squat:{kg:90,reps:15},dl:{kg:80,reps:12},bench:{kg:7
 var EASY_F=0.85; // 편한 러닝 → 레이스 환산
 function getProf(){ return store.goal.prof||(store.goal.est==='owner'?OWNER_PROF:{}); }
 function e1rm(kg,reps){ kg=Number(kg); reps=Number(reps); if(!(kg>0)||!(reps>0)) return null; return kg*(1+Math.min(reps,20)/30); }
-// 내운동 기록 카드에서 가장 좋은 근력 · 러닝 값 찾기
+// 운동기록 카드에서 가장 좋은 근력 · 러닝 값 찾기
 function bestFromRecords(){
   var o={squat:null,dl:null,bench:null,pullup:null,run10:null,runSrc:''};
   store.events.forEach(function(e){
@@ -2521,7 +2522,7 @@ function renderEst(){
     [['squat','스쿼트',sqv,R.squat],['dl','데드리프트',dlv,R.dl],['bench','벤치',bnv,R.bench]].map(function(x){ return '<span class="ln">'+x[1]+'</span><input type="number" inputmode="decimal" id="es-'+x[0]+'-kg" value="'+esc(x[2].kg||'')+'" placeholder="kg"><span class="muted">×</span><input type="number" inputmode="numeric" id="es-'+x[0]+'-r" value="'+esc(x[2].reps||'')+'" placeholder="회"><span class="muted lr">'+(x[3]?'기록 '+Math.round(x[3])+'kg':'')+'</span>'; }).join('')+
     '<span class="ln">풀업</span><input type="number" inputmode="numeric" id="es-pu" value="'+esc(P.pullup||'')+'" placeholder="최대 회"><span></span><span></span><span class="muted lr">'+(R.pullup?'기록 '+R.pullup+'회':'')+'</span></div>';
   h+='<button class="btn pri big" data-act="estsave">저장하고 다시 계산</button>';
-  h+='<div class="muted" style="margin-top:8px">내운동 기록 카드의 웨이트 · 러닝 기록이 더 좋으면 그 값을 써요. 스테이션은 측정 기록이 있으면 측정값을 써요.</div>';
+  h+='<div class="muted" style="margin-top:8px">운동기록 카드의 웨이트 · 러닝 기록이 더 좋으면 그 값을 써요. 스테이션은 측정 기록이 있으면 측정값을 써요.</div>';
   h+='<div class="row" style="margin-top:8px"><span class="sp"></span><button class="btn sm" data-tab-go="wod">스테이션 측정 기록 ›</button></div></div>';
   document.getElementById('p-est').innerHTML=h;
 }
@@ -2641,7 +2642,7 @@ document.addEventListener('click',function(e){
     var nser=store.events.filter(function(x){ return x.series===ds.mdelser&&!x.done; }).length;
     store.events=store.events.filter(function(x){ return !(x.series===ds.mdelser&&!x.done); }); ui.delArm=null; ui.mopen=null; saveEvents(); toast('반복 일정 '+nser+'개를 지웠어요'); render(); return;
   }
-  // 내운동
+  // 운동기록
   if(ds.mmon){ ui.mon=ds.mmon; ui.evf=null; ui.evc=null; render(); return; }
   if(ds.mday){ ui.mday=ds.mday; ui.evf=null; ui.evc=null; ui.mopen=null; render(); scrollToId('mday'); return; }
   if(ds.mgo){ ui.mday=ds.mgo; ui.mon=ds.mgo.slice(0,7); ui.mopen=ds.mopen||null; ui.evf=null; ui.evc=null; render(); scrollToId('mday'); return; }
@@ -2738,7 +2739,7 @@ document.addEventListener('click',function(e){
     store.tests=store.tests.concat([{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),k:(tm.mode==='full'||(tm.segs&&tm.segs.length===16&&tm.mode!=='short'))?'full':'half',d:key(TODAY),s:tot,splits:sp,mode:tm.mode}]);
     saveTests();
     store.events=store.events.concat([{id:newId(),d:key(TODAY),tag:'hyrox',title:MODES[tm.mode].n,time:'',place:'',memo:'',done:true,card:{text:(tm.segs||[]).map(function(x){ return x.n; }).join(' / '),score:fmtT(tot),dur:Math.round(tot/6)/10,rpe:8}}]); saveEvents();
-    tm.saved=true; saveTimer(); toast('내운동에 저장했어요 · '+fmtT(tot)); render(); return;
+    tm.saved=true; saveTimer(); toast('운동기록에 저장했어요 · '+fmtT(tot)); render(); return;
   }
   if(a==='obdone'){
     var t10=parseT((document.getElementById('ob-10k')||{}).value), kgv=parseFloat((document.getElementById('ob-kg')||{}).value);
