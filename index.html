@@ -272,6 +272,7 @@ tr.cur td{background:var(--accent-soft)}
 .pctline input{width:58px;padding:7px 6px;text-align:center}
 .pctline .chipbtn{padding:6px 10px}
 table.alloc th,table.alloc td{padding:7px 6px;white-space:nowrap}
+.tbl.fit{overflow-x:visible} table.best th,table.best td{padding:8px 5px} table.best td:first-child{word-break:keep-all} table.best .st{white-space:normal;display:inline-block;line-height:1.3;text-align:center}
 table.alloc td:first-child{white-space:normal}
 table.alloc sup{color:var(--muted);font-size:10px}
 .gapc{background:var(--chip);border-radius:12px;padding:8px 9px;min-width:0}
@@ -407,7 +408,8 @@ h3.step i{font-style:normal;width:22px;height:22px;border-radius:50%;display:inl
 .why{background:var(--chip);border-radius:10px;padding:8px 10px}
 .wt{display:flex;align-items:center;gap:8px} .wt b{flex:1} .wt .num{font-weight:700}
 .badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--surface-solid);color:var(--muted)} .badge.ok{background:var(--ok-soft);color:var(--ok)}
-.wd{font-size:12.5px;color:var(--muted);margin-top:2px}
+.wyd{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.45;word-break:keep-all}
+.wtm{display:flex;justify-content:space-between;align-items:baseline;margin-top:5px;padding-top:5px;border-top:1px dashed var(--line);font-size:13px;color:var(--muted)} .wtm .num{font-weight:800;font-size:16px;color:var(--ink)}
 .liftg{display:grid;grid-template-columns:70px 1fr 12px 1fr;gap:6px 6px;align-items:center}
 .liftg .lr{grid-column:1/-1;margin:-4px 0 4px 76px;font-size:12px}
 .liftg .ln{font-weight:600;font-size:14px}
@@ -493,7 +495,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .legend{font-size:13px}
   .mchip{font-size:13px}
   .tl-r{font-size:14px}
-  .wd{font-size:14.5px} .wk-t b{font-size:15px} .wk-t span{font-size:13px}
+  .wd{font-size:14.5px} .wyd{font-size:14px} .wk-t b{font-size:15px} .wk-t span{font-size:13px}
   .wod-t b{font-size:15px} .wod-t span{font-size:13px}
   .tip{font-size:13px}
   label.f{font-size:13px}
@@ -1295,7 +1297,7 @@ function testsHtml(){
   h+='</div>';
 
   var sum=0, have=0;
-  h+='<div class="card"><h2>종목별 최고 기록</h2><div class="muted" style="margin-bottom:8px">종목을 누르면 날짜별 기록이 펼쳐져요.</div><div class="tbl"><table><tr><th>종목</th><th class="n">최고</th><th class="n">목표</th><th>상태</th></tr>';
+  h+='<div class="card"><h2>종목별 최고 기록</h2><div class="muted" style="margin-bottom:8px">종목을 누르면 날짜별 기록이 펼쳐져요.</div><div class="tbl fit"><table class="best"><tr><th>종목</th><th class="n">최고</th><th class="n">목표</th><th>상태</th></tr>';
   TESTS.forEach(function(t){
     var b=best(t.k), list=store.tests.filter(function(e){ return e.k===t.k; }), cnt=list.length;
     if(STATION_KEYS.indexOf(t.k)>=0 && b){ sum+=b.s; have++; }
@@ -1303,7 +1305,7 @@ function testsHtml(){
     if(b && t.t) st=b.s<=t.t?'<span class="st ok">✓ 달성</span>':'<span class="st no">'+fmtT(b.s-t.t)+' 남음</span>';
     else if(b) st='<span class="st na">'+cnt+'회</span>';
     var open=ui.histOpen===t.k;
-    h+='<tr data-hist="'+t.k+'" style="cursor:pointer"'+(open?' class="cur"':'')+'><td class="nw">'+(open?'▾ ':'▸ ')+esc(t.n)+(cnt?' <span class="muted">('+cnt+')</span>':'')+'</td><td class="n">'+(b?fmtT(b.s):'—')+'</td><td class="n">'+(t.tl||fmtT(t.t))+'</td><td>'+st+'</td></tr>';
+    h+='<tr data-hist="'+t.k+'" style="cursor:pointer"'+(open?' class="cur"':'')+'><td>'+(open?'▾ ':'▸ ')+esc(t.n.replace(' · 임의',''))+(cnt?' <span class="muted">('+cnt+')</span>':'')+'</td><td class="n num">'+(b?fmtT(b.s):'—')+'</td><td class="n num">'+String(t.tl||fmtT(t.t)).replace(/ \((.+)\)$/,'<div class="muted" style="font-size:12px">$1</div>')+'</td><td>'+st+'</td></tr>';
     if(open){
       var asc=list.slice().sort(function(a,c){ return a.d<c.d?-1:a.d>c.d?1:0; });
       var dsc=asc.slice().reverse();
@@ -2479,7 +2481,7 @@ function renderEst(){
   var gi=goalInfo(), mc=estModel(), P=getProf(), R=bestFromRecords(), myPct=gi?pctRank(gi.A.t,mc.total):null;
   var rows=[['러닝 8km','run'],['스키에르그','ski'],['슬레드 푸시','push'],['슬레드 풀','pull'],['버피 점프','bbj'],['로잉','row'],['파머스','farm'],['샌드백 런지','lunge'],['월볼','wb'],['록스존','rox']];
   var h='<div class="card"><div class="row"><h2 style="margin:0">(현) 내 예상 수준</h2><span class="sp"></span><b class="num" style="font-size:22px;color:var(--accent)">'+fmtT(mc.total)+'</b></div>'+(myPct?'<div class="muted" style="margin:2px 0 10px">'+esc(goalLabelShort().split('·').slice(0,4).join('·'))+'에서 상위 '+myPct+'%</div>':'');
-  h+='<div class="whylist">'+rows.map(function(r){ var k=r[1]; return '<div class="why"><div class="wt"><b>'+r[0]+'</b><span class="num">'+fmtT(mc[k])+'</span><span class="badge '+(mc.src[k]==='측정'?'ok':'')+'">'+(mc.src[k]||'추정')+'</span></div><div class="wd">'+esc(mc.why[k]||'')+'</div></div>'; }).join('')+'</div></div>';
+  h+='<div class="whylist">'+rows.map(function(r){ var k=r[1]; return '<div class="why"><div class="wt"><b>'+r[0]+'</b><span class="badge '+(mc.src[k]==='측정'?'ok':'')+'">'+(mc.src[k]||'추정')+'</span></div><div class="wyd">'+esc(mc.why[k]||'')+'</div><div class="wtm"><span>'+(mc.src[k]==='측정'?'측정 시간':'추정 시간')+'</span><span class="num">'+fmtT(mc[k])+'</span></div></div>'; }).join('')+'</div></div>';
   // 입력
   var sqv=P.squat||{}, dlv=P.dl||{}, bnv=P.bench||{}, rnv=P.run||{};
   h+='<div class="card"><h2>내 데이터</h2>';
