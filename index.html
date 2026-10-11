@@ -406,6 +406,20 @@ h3.step i{font-style:normal;width:22px;height:22px;border-radius:50%;display:inl
 /* 내 예상 수준 */
 .whylist{display:flex;flex-direction:column;gap:6px}
 a.btn{text-decoration:none;display:inline-flex;align-items:center}
+#news{position:fixed;inset:0;z-index:160;background:rgba(8,10,30,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:18px;animation:nIn .25s ease}
+#news.out{opacity:0;transition:opacity .25s}
+#news .nbox{width:100%;max-width:400px;max-height:82vh;display:flex;flex-direction:column;background:var(--surface-solid);color:var(--ink);border-radius:20px;overflow:hidden;box-shadow:0 30px 60px -20px rgba(0,0,0,.6);animation:nPop .35s cubic-bezier(.2,1.3,.4,1)}
+#news .nhead{padding:18px 20px 14px;color:#fff;background:radial-gradient(120% 120% at 100% 0%,#4b2bd6,rgba(75,43,214,0) 60%),linear-gradient(140deg,#141a4a,#0b1030)}
+#news .nhead h2{margin:6px 0 2px;font-size:20px} #news .nhead p{margin:0;font-size:13.5px;color:rgba(255,255,255,.75)}
+#news .nb{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;padding:2px 8px;border-radius:999px;background:linear-gradient(120deg,#ff6a2b,#ffa24d);color:#fff}
+#news .nbody{padding:14px 20px;overflow:auto}
+#news .nfoot{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:12px 20px 16px;border-top:1px solid var(--line)}
+.chg+.chg{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.chg-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap} .chg-h b{font-size:16px} .chg-h .num{color:var(--muted);font-size:13px} .chg-h em{font-style:normal;font-weight:700;color:var(--accent)}
+.chg-k{font-size:13px;font-weight:800;margin:8px 0 2px} .chg-k.add{color:var(--hot)} .chg-k.fix{color:var(--accent)}
+.chg ul{margin:2px 0 0;padding-left:20px} .chg li{margin:3px 0;font-size:14.5px}
+.chglist{margin-top:10px}
+@keyframes nIn{from{opacity:0}} @keyframes nPop{from{opacity:0;transform:translateY(20px) scale(.96)}}
 .feats{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .feat{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--chip)} .feat .fi{font-size:18px;line-height:1.2} .feat.on{background:var(--ok-soft)} .feat.on .fi{color:var(--ok);font-weight:800}
 .lockc{position:relative;overflow:hidden} .lockc .lk{position:absolute;right:14px;top:10px;font-size:26px;opacity:.85}
@@ -895,8 +909,34 @@ function dietFor(type,n){
 var LSK='hyrox-incheon-2027-v1';
 var APP_INFO={ver:'2026.10.12',by:'@81ondal',url:'https://k1pale92.github.io/hyrox/',manual:'https://k1pale92.github.io/hyrox/manual.html'};
 var CHANGES=[
-  ['2026.10.12','첫 버전 출시 (v1.0) — 홈 · 분석 · 운동기록 · 운동효과 · 시뮬레이션 · 가이드 · 내정보']
+  {v:'1.0',d:'2026.10.12',t:'첫 버전 출시',
+   add:['홈 · 분석 · 운동기록 · 운동효과 · 시뮬레이션 · 가이드 · 내정보 7개 탭','시작 화면 · 초대 비밀번호','새 기능 열기(코드) — 첫 기능: 레이스 체크포인트 카드','새 버전 알림 (지금 보고 있는 이 창)'],
+   fix:[]}
 ];
+APP_INFO.v=CHANGES[0].v; APP_INFO.ver=CHANGES[0].d;
+var SEEN_K='hx-seen-ver';
+function changeHtml(c){
+  var h='<div class="chg"><div class="chg-h"><b>v'+esc(c.v)+'</b><span class="num">'+esc(c.d)+'</span>'+(c.t?'<em>'+esc(c.t)+'</em>':'')+'</div>';
+  if(c.add&&c.add.length) h+='<div class="chg-k add">✨ 새로 추가</div><ul>'+c.add.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>';
+  if(c.fix&&c.fix.length) h+='<div class="chg-k fix">🛠 수정 · 개선</div><ul>'+c.fix.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>';
+  return h+'</div>';
+}
+function newsSince(seen){ var out=[]; for(var i=0;i<CHANGES.length;i++){ if(CHANGES[i].v===seen) break; out.push(CHANGES[i]); } return out.length===CHANGES.length&&seen?[CHANGES[0]]:out; }
+function showNews(list){
+  if(!list||!list.length||document.getElementById('news')) return;
+  var n=document.createElement('div'); n.id='news';
+  n.innerHTML='<div class="nbox" role="dialog" aria-label="새 버전 알림"><div class="nhead"><span class="nb">NEW</span><h2>새 버전 v'+esc(CHANGES[0].v)+' 업데이트</h2><p>무엇이 바뀌었는지 확인하세요.</p></div><div class="nbody">'+list.map(changeHtml).join('')+'</div><div class="nfoot"><span class="muted">지난 내역: 내정보 → 업데이트 내역</span><button class="btn pri" data-act="newsok">확인</button></div></div>';
+  document.body.appendChild(n);
+}
+function checkNews(){
+  try{
+    if(/[?&]demo=/.test(location.search)) return;
+    var seen=localStorage.getItem(SEEN_K);
+    if(seen===CHANGES[0].v) return;
+    if(seen===null&&!HAD_DATA){ localStorage.setItem(SEEN_K,CHANGES[0].v); return; }   // 처음 설치한 사람은 알림 없이 시작
+    showNews(newsSince(seen));
+  }catch(e){}
+}
 function manualUrl(){ return IS_PWA?'manual.html':APP_INFO.manual; }
 var GOAL0={type:'single',div:'hyrox-open',g:'M',ag:'45-49',pct:25,set:false,est:'group',kg:null};
 // 이미 기록이 있는 폰(만든 사람)은 첫 설정 화면을 건너뛰고 기존 추정 방식을 유지
@@ -2035,10 +2075,10 @@ function renderMe(){
   h+=featHtml();
   h+=backupHtml();
   h+='<div class="card"><h2>앱 정보</h2>';
-  h+='<div class="kv"><span>버전</span><b class="num">'+APP_INFO.ver+'</b></div><div class="kv"><span>제작</span><b>'+esc(APP_INFO.by)+'</b></div>';
+  h+='<div class="kv"><span>버전</span><b class="num">v'+APP_INFO.v+' · '+APP_INFO.ver+'</b></div><div class="kv"><span>제작</span><b>'+esc(APP_INFO.by)+'</b></div>';
   h+='<div class="row" style="margin-top:10px"><button class="btn sm" data-act="meshare">앱 링크 공유</button>'+(IS_PWA?'<button class="btn sm" data-act="meupdate">최신 버전 받기</button>':'')+'<a class="btn sm ghost" href="'+manualUrl()+'" target="_blank" rel="noopener">사용 설명서</a></div>';
   h+='<div class="muted" style="margin-top:10px">'+(IS_PWA?'기록은 서버로 보내지 않고 <b>이 폰 안에만</b> 저장돼요. 로그인이 없어서 앱 링크를 받은 사람은 각자 자기 기록으로 새로 시작해요. 앱이 업데이트돼도 기록은 그대로예요.':'claude.ai 계정별로 기록이 따로 저장돼요.')+'</div></div>';
-  h+='<div class="card"><h2>업데이트 내역</h2><ul class="lines">'+CHANGES.map(function(c){ return '<li><span class="num muted">'+c[0]+'</span> '+esc(c[1])+'</li>'; }).join('')+'</ul></div>';
+  h+='<div class="card"><div class="row"><h2 style="margin:0">업데이트 내역</h2><span class="sp"></span><button class="btn sm" data-act="newsshow">알림 다시 보기</button></div><div class="chglist">'+CHANGES.map(changeHtml).join('')+'</div></div>';
   if(IS_PWA) h+='<div class="card"><h2>처음부터 다시 시작</h2><div class="muted">이 폰의 모든 기록 · 일정 · 사진 · 목표를 지우고 첫 화면부터 시작해요. 먼저 백업 파일을 저장해 두세요.</div><div class="row" style="margin-top:10px"><span class="sp"></span><button class="btn sm ghost" data-act="mewipe" style="color:var(--warn)">'+(ui.wipeArm?'정말 모두 지우기':'모든 기록 지우기')+'</button></div></div>';
   h+='<div class="muted" style="text-align:center;margin:6px 0 4px">하이록스훈련은 개인이 만든 비공식 앱이에요. 기록 데이터: '+esc(HX.src||'Hyranking 집계')+'</div>';
   document.getElementById('p-me').innerHTML=h;
@@ -2245,7 +2285,7 @@ function goalCardHtml(){
   var gi=goalInfo(), g=store.goal;
   var h='<div class="card intro"><span class="eyebrow">'+(store.goal.nick?'<span style="text-transform:none">'+esc(store.goal.nick)+'</span>님의 하이록스 인천 2027':'하이록스 인천 2027 준비 앱')+'</span>';
   h+='<p style="margin:6px 0 10px">목표를 정하면 지금 내 위치와 줄여야 할 시간을 보여 주는 개인 훈련 앱이에요.</p>';
-  h+='<div class="appinfo"><div>업데이트 '+APP_INFO.ver+' · 제작 '+esc(APP_INFO.by)+' · <a href="'+manualUrl()+'" target="_blank" rel="noopener">사용 설명서</a></div><div>기록 데이터: HYROX 인천 2026 (5/15–17) 결과 · '+esc(HX.src||'Hyranking 집계')+'</div></div>';
+  h+='<div class="appinfo"><div>v'+APP_INFO.v+' ('+APP_INFO.ver+') · 제작 '+esc(APP_INFO.by)+' · <a href="'+manualUrl()+'" target="_blank" rel="noopener">사용 설명서</a></div><div>기록 데이터: HYROX 인천 2026 (5/15–17) 결과 · '+esc(HX.src||'Hyranking 집계')+'</div></div>';
   h+='<div class="goalbox"><div class="gh"><span class="l">내 목표</span><button class="btn sm" data-act="goaledit">'+(ui.goalEdit?'닫기':'목표 바꾸기')+'</button></div><div class="v"><span>'+esc(goalLabelShort())+'</span>'+(gi?'<span class="t">→ <b class="num">'+fmtT(gi.T)+'</b></span>':'')+'</div></div>';
   if(ui.goalEdit){
     var G=HX.groups&&HX.groups[g.div+'|'+g.g];
@@ -2888,6 +2928,8 @@ document.addEventListener('click',function(e){
     saveTests(); ce.card=card; ce.done=true; store.events=store.events.slice(); saveEvents(); ui.evc=null; ui.evcMsg=''; toast('기록 카드를 저장했어요'); render(); return;
   }
   if(a==='edprev'||a==='ednext'){ ui.edDay=key(keyDn(ui.edDay)+(a==='edprev'?-1:1)); render(); return; }
+  if(a==='newsok'){ try{ localStorage.setItem(SEEN_K,CHANGES[0].v); }catch(err){} var nw=document.getElementById('news'); if(nw){ nw.classList.add('out'); setTimeout(function(){ nw.remove(); },250); } return; }
+  if(a==='newsshow'){ showNews([CHANGES[0]]); return; }
   if(a==='featopen'){
     var fc=document.getElementById('feat-code'), r=featUnlock(fc?fc.value:'');
     if(r.got.length){ toast('🎉 '+r.got.map(function(f){ return f.n; }).join(', ')+' 열림!'); render(); }
@@ -3079,6 +3121,7 @@ loadTimer();
 render();
 initDb();
 gate();
+checkNews();
 setInterval(function(){ var t=todayDn(); if(t!==TODAY){ TODAY=t; if(!editing()) render(); } },60000);
 })();
 </script>
