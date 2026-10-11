@@ -477,6 +477,49 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 
 /* 세로 폰 기준 글씨 크기 */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* 시작 화면 */
+#splash,#gate{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;overflow:hidden;
+  background:radial-gradient(120% 80% at 85% 0%,#4b2bd6 0%,rgba(75,43,214,0) 55%),radial-gradient(90% 60% at 0% 100%,rgba(255,90,31,.35) 0%,rgba(255,90,31,0) 60%),linear-gradient(160deg,#141a4a 0%,#0b1030 100%)}
+#splash{z-index:200;transition:opacity .45s ease,transform .45s ease}
+#splash.out{opacity:0;transform:scale(1.08);pointer-events:none}
+.sp-c{display:flex;flex-direction:column;align-items:center;position:relative}
+.sp-kb{width:190px;height:165px;animation:spDrop .7s cubic-bezier(.2,1.4,.4,1) both;filter:drop-shadow(0 18px 40px rgba(255,90,31,.45))}
+.sp-bolt{animation:spBolt .5s .65s both}
+.sp-sl line{stroke-dasharray:60;stroke-dashoffset:60;animation:spLine .35s ease-out forwards}
+.sp-sl line:nth-child(1){animation-delay:.55s} .sp-sl line:nth-child(2){animation-delay:.62s} .sp-sl line:nth-child(3){animation-delay:.69s}
+.sp-t1{font-family:'Black Han Sans',sans-serif;font-size:62px;line-height:1;margin-top:10px;display:flex;gap:2px}
+.sp-t1 span{display:inline-block;opacity:0;animation:spUp .5s cubic-bezier(.2,1.2,.4,1) forwards}
+.sp-t1 span:nth-child(1){animation-delay:.35s} .sp-t1 span:nth-child(2){animation-delay:.42s} .sp-t1 span:nth-child(3){animation-delay:.49s} .sp-t1 span:nth-child(4){animation-delay:.56s}
+.sp-t2{font-family:'IBM Plex Mono',monospace;font-weight:700;color:#ff8a3d;font-size:17px;margin-top:12px;opacity:0;animation:spWide .7s .7s ease-out forwards}
+.sp-glow{position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(255,138,61,.35),rgba(255,138,61,0) 65%);animation:spPulse 1.6s .5s ease-in-out infinite;pointer-events:none}
+.sp-streak{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.sp-streak i{position:absolute;height:2px;width:38%;right:-40%;border-radius:2px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.55));animation:spStreak 1.1s linear infinite}
+.sp-streak i:nth-child(1){top:18%;animation-delay:.1s} .sp-streak i:nth-child(2){top:31%;animation-delay:.5s;width:24%} .sp-streak i:nth-child(3){top:68%;animation-delay:.3s} .sp-streak i:nth-child(4){top:80%;animation-delay:.8s;width:28%} .sp-streak i:nth-child(5){top:90%;animation-delay:.2s;width:18%}
+.sp-b{position:absolute;left:0;right:0;bottom:calc(56px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;animation:spFade .5s .8s forwards}
+.sp-dd{font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:2px;color:rgba(255,255,255,.75)} .sp-dd b{color:#ffb347;font-size:15px;letter-spacing:1px}
+.sp-bar{width:150px;height:3px;border-radius:3px;background:rgba(255,255,255,.15);overflow:hidden} .sp-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffb347,#ff5a1f);animation:spBar 1.3s .3s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes spDrop{0%{opacity:0;transform:translateY(-60px) scale(.7) rotate(-12deg)}100%{opacity:1;transform:none}}
+@keyframes spBolt{0%,40%{opacity:0}50%{opacity:1}60%{opacity:.2}100%{opacity:1}}
+@keyframes spLine{to{stroke-dashoffset:0}}
+@keyframes spUp{0%{opacity:0;transform:translateY(26px) scale(.9)}100%{opacity:1;transform:none}}
+@keyframes spWide{0%{opacity:0;letter-spacing:0}100%{opacity:1;letter-spacing:9px}}
+@keyframes spPulse{0%,100%{transform:scale(.9);opacity:.7}50%{transform:scale(1.08);opacity:1}}
+@keyframes spStreak{0%{transform:translateX(0)}100%{transform:translateX(-380%)}}
+@keyframes spFade{to{opacity:1}}
+@keyframes spBar{to{width:100%}}
+@media (prefers-reduced-motion:reduce){ #splash *{animation-duration:.01s!important;animation-delay:0s!important} }
+/* 비밀번호 */
+#gate{z-index:150;padding:24px;text-align:center}
+#gate .sp-kb{width:120px;height:104px;animation:none}
+#gate h1{font-family:'Black Han Sans',sans-serif;font-size:34px;font-weight:400;margin:6px 0 4px}
+#gate p{color:rgba(255,255,255,.75);font-size:14.5px;margin:0 0 18px;line-height:1.5}
+#gate form{display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px}
+#gate input{font:inherit;font-size:17px;text-align:center;padding:13px 14px;border-radius:14px;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;outline:none}
+#gate input:focus{border-color:#ff8a3d}
+#gate button{font:inherit;font-size:16px;font-weight:700;padding:13px;border:0;border-radius:14px;color:#fff;background:linear-gradient(120deg,#ff6a2b,#ffa24d);cursor:pointer}
+#gate .gmsg{min-height:1.3em;font-size:13.5px;color:#ffb3a0}
+#gate.shake form{animation:gShake .4s}
+@keyframes gShake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 @media (max-width:600px){
   body{font-size:16px}
   .muted{font-size:14px}
@@ -534,6 +577,19 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </head>
 <body>
 <div class="bgfx" aria-hidden="true"><i></i><i></i><i></i><b></b><s></s><s></s><s></s></div>
+<div id="splash" aria-hidden="true"><div class="sp-streak"><i></i><i></i><i></i><i></i><i></i></div><div class="sp-glow"></div><div class="sp-c"><svg class="sp-kb" viewBox="0 0 230 200" aria-hidden="true"><defs><linearGradient id="spo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#ff5a1f"/></linearGradient></defs><g class="sp-sl" stroke="#ff8a3d" stroke-width="11" stroke-linecap="round"><line x1="8" y1="104" x2="52" y2="104"/><line x1="22" y1="134" x2="56" y2="134"/><line x1="36" y1="164" x2="62" y2="164"/></g><path d="M90 100 L84 52 Q82 30 104 30 L166 30 Q188 30 186 52 L180 100" fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><circle cx="135" cy="128" r="64" fill="url(#spo)"/><rect x="97" y="180" width="76" height="14" rx="6" fill="#e2491a"/><path class="sp-bolt" d="M143 96 L113 138 L134 138 L125 172 L160 126 L139 126 L150 96 Z" fill="#fff"/></svg><div class="sp-t1"><span>하</span><span>이</span><span>록</span><span>스</span></div><div class="sp-t2">TRAINING</div></div><div class="sp-b"><div class="sp-dd">HYROX INCHEON 2027 · <b id="sp-d"></b></div><div class="sp-bar"><i></i></div></div></div>
+<script>
+(function(){
+  var sp=document.getElementById('splash'), t0=Date.now(), done=false;
+  if(/[?&]demo=/.test(location.search)){ sp.remove(); return; }
+  var n=new Date(), d=Math.round((Date.UTC(2027,4,13)-Date.UTC(n.getFullYear(),n.getMonth(),n.getDate()))/864e5);
+  document.getElementById('sp-d').textContent=d>0?'D-'+d:d===0?'D-DAY':'FINISH';
+  function hide(){ if(done) return; done=true; sp.classList.add('out'); setTimeout(function(){ sp.remove(); },500); }
+  window.addEventListener('load',function(){ setTimeout(hide,Math.max(0,1800-(Date.now()-t0))); });
+  setTimeout(hide,4000);
+  sp.addEventListener('click',hide);
+})();
+</script>
 
 
 
@@ -832,8 +888,9 @@ function dietFor(type,n){
 
 /* ---------- store ---------- */
 var LSK='hyrox-incheon-2027-v1';
-var APP_INFO={ver:'2026.10.11',by:'@81ondal',url:'https://k1pale92.github.io/hyrox/',manual:'https://k1pale92.github.io/hyrox/manual.html'};
+var APP_INFO={ver:'2026.10.12',by:'@81ondal',url:'https://k1pale92.github.io/hyrox/',manual:'https://k1pale92.github.io/hyrox/manual.html'};
 var CHANGES=[
+  ['2026.10.12','시작 화면(로딩) · 초대 비밀번호'],
   ['2026.10.11','하단 탭 이름: 운동기록 · 운동효과'],
   ['2026.10.11','앱 이름 하이록스훈련 · 새 아이콘 · 내정보 탭'],
   ['2026.10.11','운동기록: +계획/+기록 가운데, 운동 종류별 모양, 필터 전체 선택/해제'],
@@ -1984,6 +2041,22 @@ function renderMe(){
   h+='<div class="muted" style="text-align:center;margin:6px 0 4px">하이록스훈련은 개인이 만든 비공식 앱이에요. 기록 데이터: '+esc(HX.src||'Hyranking 집계')+'</div>';
   document.getElementById('p-me').innerHTML=h;
 }
+// 초대 비밀번호: 해시만 들고 있어요 (FNV-1a, 'hyrox|' + 소문자)
+var GATE_H='263410fc', GATE_K='hx-unlock';
+function gateHash(p){ var h=0x811c9dc5, x='hyrox|'+String(p||'').trim().toLowerCase(); for(var i=0;i<x.length;i++){ h^=x.charCodeAt(i); h=Math.imul(h,0x01000193)>>>0; } return h.toString(16); }
+function gate(){
+  if(!IS_PWA) return;
+  try{ if(/[?&]demo=/.test(location.search)) return; if(localStorage.getItem(GATE_K)==='1') return; if(HAD_DATA){ localStorage.setItem(GATE_K,'1'); return; } }catch(e){ return; }
+  var g=document.createElement('div'); g.id='gate';
+  g.innerHTML="<svg class=\"sp-kb\" viewBox=\"0 0 230 200\" aria-hidden=\"true\"><defs><linearGradient id=\"gto\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ffb347\"/><stop offset=\"1\" stop-color=\"#ff5a1f\"/></linearGradient></defs><g class=\"sp-sl\" stroke=\"#ff8a3d\" stroke-width=\"11\" stroke-linecap=\"round\"><line x1=\"8\" y1=\"104\" x2=\"52\" y2=\"104\"/><line x1=\"22\" y1=\"134\" x2=\"56\" y2=\"134\"/><line x1=\"36\" y1=\"164\" x2=\"62\" y2=\"164\"/></g><path d=\"M90 100 L84 52 Q82 30 104 30 L166 30 Q188 30 186 52 L180 100\" fill=\"none\" stroke=\"#fff\" stroke-width=\"18\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"135\" cy=\"128\" r=\"64\" fill=\"url(#gto)\"/><rect x=\"97\" y=\"180\" width=\"76\" height=\"14\" rx=\"6\" fill=\"#e2491a\"/><path class=\"sp-bolt\" d=\"M143 96 L113 138 L134 138 L125 172 L160 126 L139 126 L150 96 Z\" fill=\"#fff\"/></svg>"+'<h1>하이록스훈련</h1><p>초대받은 분만 쓸 수 있어요.<br>안내받은 비밀번호를 넣어 주세요.</p><form id="gate-f" autocomplete="off"><input id="gate-p" type="password" placeholder="비밀번호" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="submit">입장하기</button><div class="gmsg" id="gate-m"></div></form>';
+  document.body.appendChild(g); document.documentElement.style.overflow='hidden';
+  document.getElementById('gate-f').addEventListener('submit',function(e){
+    e.preventDefault();
+    var v=document.getElementById('gate-p').value;
+    if(gateHash(v)===GATE_H){ try{ localStorage.setItem(GATE_K,'1'); }catch(err){} g.style.transition='opacity .35s'; g.style.opacity='0'; setTimeout(function(){ g.remove(); document.documentElement.style.overflow=''; },380); toast('환영해요! 목표부터 정해 볼까요?'); }
+    else { document.getElementById('gate-m').textContent='비밀번호가 맞지 않아요'; g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); }
+  });
+}
 function backupHtml(){
   var h='';
   h+='<div class="card"><h2>백업 · 복원</h2><div class="muted">완료 체크, WOD, 운동 기록, 측정, 체중, 목표를 파일 하나로 저장하거나 되살려요.</div>';
@@ -2963,6 +3036,7 @@ if(IS_PWA){
   try{ if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){}); }catch(e){}
   try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(function(){}); }catch(e){}
 }
+var HAD_DATA=false; try{ var s0=JSON.parse(localStorage.getItem(LSK)||'null'); HAD_DATA=!!(s0&&s0.goal&&s0.goal.set); }catch(e){}
 loadLocal();
 ensureGoalSet();
 seedEvents();
@@ -2971,6 +3045,7 @@ syncAnaToGoal();
 loadTimer();
 render();
 initDb();
+gate();
 setInterval(function(){ var t=todayDn(); if(t!==TODAY){ TODAY=t; if(!editing()) render(); } },60000);
 })();
 </script>
