@@ -2243,7 +2243,7 @@ function goalInfo(){ var g=store.goal, G=HX.groups&&HX.groups[g.div+'|'+g.g]; if
 ui.goalEdit=false;
 function goalCardHtml(){
   var gi=goalInfo(), g=store.goal;
-  var h='<div class="card intro"><span class="eyebrow">'+(store.goal.nick?esc(store.goal.nick)+'님의 하이록스 인천 2027':'하이록스 인천 2027 준비 앱')+'</span>';
+  var h='<div class="card intro"><span class="eyebrow">'+(store.goal.nick?'<span style="text-transform:none">'+esc(store.goal.nick)+'</span>님의 하이록스 인천 2027':'하이록스 인천 2027 준비 앱')+'</span>';
   h+='<p style="margin:6px 0 10px">목표를 정하면 지금 내 위치와 줄여야 할 시간을 보여 주는 개인 훈련 앱이에요.</p>';
   h+='<div class="appinfo"><div>업데이트 '+APP_INFO.ver+' · 제작 '+esc(APP_INFO.by)+' · <a href="'+manualUrl()+'" target="_blank" rel="noopener">사용 설명서</a></div><div>기록 데이터: HYROX 인천 2026 (5/15–17) 결과 · '+esc(HX.src||'Hyranking 집계')+'</div></div>';
   h+='<div class="goalbox"><div class="gh"><span class="l">내 목표</span><button class="btn sm" data-act="goaledit">'+(ui.goalEdit?'닫기':'목표 바꾸기')+'</button></div><div class="v"><span>'+esc(goalLabelShort())+'</span>'+(gi?'<span class="t">→ <b class="num">'+fmtT(gi.T)+'</b></span>':'')+'</div></div>';
