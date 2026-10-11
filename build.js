@@ -11,7 +11,7 @@ const html = '<!doctype html>\n<html lang="ko">\n<head>\n' +
   '<meta name="mobile-web-app-capable" content="yes">\n' +
   '<meta name="apple-mobile-web-app-capable" content="yes">\n' +
   '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n' +
-  '<meta name="apple-mobile-web-app-title" content="하이록스">\n' +
+  '<meta name="apple-mobile-web-app-title" content="하이록스훈련">\n' +
   '<link rel="manifest" href="manifest.webmanifest">\n' +
   '<link rel="icon" type="image/png" href="icon-192.png">\n' +
   '<link rel="apple-touch-icon" href="icon-192.png">\n' +
