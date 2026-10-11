@@ -1,5 +1,5 @@
 // 오프라인 캐시: 앱 파일은 네트워크 우선(업데이트 반영), 폰트 등 외부 파일은 캐시 우선
-const VERSION = '98042c04';
+const VERSION = 'b15c1fe4';
 const CACHE = 'hyrox-' + VERSION;
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
