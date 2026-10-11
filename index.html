@@ -406,6 +406,11 @@ h3.step i{font-style:normal;width:22px;height:22px;border-radius:50%;display:inl
 /* 내 예상 수준 */
 .whylist{display:flex;flex-direction:column;gap:6px}
 a.btn{text-decoration:none;display:inline-flex;align-items:center}
+.feats{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.feat{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--chip)} .feat .fi{font-size:18px;line-height:1.2} .feat.on{background:var(--ok-soft)} .feat.on .fi{color:var(--ok);font-weight:800}
+.lockc{position:relative;overflow:hidden} .lockc .lk{position:absolute;right:14px;top:10px;font-size:26px;opacity:.85}
+.lockprev{display:flex;flex-direction:column;gap:6px;margin-top:10px;filter:blur(2.5px);opacity:.7;pointer-events:none} .lockprev div{display:flex;justify-content:space-between;padding:6px 10px;border-radius:8px;background:var(--chip)}
+table.rcard td.big{font-size:17px;font-weight:800;color:var(--accent)} table.rcard tr.run td{background:var(--chip)} table.rcard th,table.rcard td{padding:7px 6px}
 .kv{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px} .kv span{color:var(--muted)} .kv b{text-align:right}
 .why{background:var(--chip);border-radius:10px;padding:8px 10px}
 .wt{display:flex;align-items:center;gap:8px} .wt b{flex:1} .wt .num{font-weight:700}
@@ -890,6 +895,7 @@ function dietFor(type,n){
 var LSK='hyrox-incheon-2027-v1';
 var APP_INFO={ver:'2026.10.12',by:'@81ondal',url:'https://k1pale92.github.io/hyrox/',manual:'https://k1pale92.github.io/hyrox/manual.html'};
 var CHANGES=[
+  ['2026.10.12','새 기능 열기(코드) · 레이스 체크포인트 카드'],
   ['2026.10.12','시작 화면(로딩) · 초대 비밀번호'],
   ['2026.10.11','하단 탭 이름: 운동기록 · 운동효과'],
   ['2026.10.11','앱 이름 하이록스훈련 · 새 아이콘 · 내정보 탭'],
@@ -1433,6 +1439,7 @@ function renderGuide(){
   var runSum=o?o.run:2550, stSum=o?o.stations:2080, rox=o?o.rox:320;
   var h='<div class="card"><h2>목표 구간 기록 · '+fmtT(runSum+stSum+rox)+'</h2><div class="muted" style="margin-bottom:8px">'+(gi?esc(goalLabel())+' 목표를 그 기록대 선수들의 실제 배분으로 나눈 값이에요.':'')+'</div><div class="tbl"><table><tr><th class="n">#</th><th>구간</th><th class="n">목표</th><th>메모</th></tr>'+SPL.map(function(r,j){ return '<tr><td class="n">'+(j+1)+'</td><td>'+r[0]+'</td><td class="n">'+fmtT(segT[j])+'</td><td>'+r[2]+'</td></tr>'; }).join('')+
     '<tr class="tot"><td></td><td>러닝 합계</td><td class="n">'+fmtT(runSum)+'</td><td>'+fp(runSum/8)+'/km</td></tr><tr class="tot"><td></td><td>스테이션 합계</td><td class="n">'+fmtT(stSum)+'</td><td></td></tr><tr class="tot"><td></td><td>록스존</td><td class="n">'+fmtT(rox)+'</td><td>이동 16번</td></tr></table></div></div>';
+  h+=raceCardHtml(segT,rox);
   h+='<div class="card"><h2>러닝 페이스</h2><div class="muted">기준: '+esc(z.src)+' · 운동효과 → 측정 기록에 5km · 10km를 넣으면 자동으로 바뀌어요.</div><div class="tbl" style="margin-top:8px"><table><tr><th>강도</th><th class="n">/km</th><th class="n">심박</th><th>용도</th></tr>'+
     '<tr><td>이지 (Z2)</td><td class="n">'+zr(z.easy)+'</td><td class="n">125–145</td><td>이지런 · 롱런, 주간의 75~80%</td></tr>'+
     '<tr><td>역치</td><td class="n">'+zr(z.thr)+'</td><td class="n">155–163</td><td>템포 · 1km 반복</td></tr>'+
@@ -2031,6 +2038,7 @@ function renderMe(){
   h+='<div class="kv"><span>목표</span><b>'+(gi?'상위 '+g.pct+'% → <span class="num">'+fmtT(gi.T)+'</span>':'—')+'</b></div>';
   h+='<div class="kv"><span>키 · 몸무게</span><b>'+(p.height?p.height+'cm':'—')+' · '+(g.kg?g.kg+'kg':'—')+'</b></div>';
   h+='<div class="row" style="margin-top:10px"><button class="btn pri sm" data-act="mesave">닉네임 저장</button><span class="sp"></span><button class="btn sm" data-act="megoal">목표 바꾸기 ›</button><button class="btn sm" data-tab-go="est">신체 · 운동 데이터 ›</button></div></div>';
+  h+=featHtml();
   h+=backupHtml();
   h+='<div class="card"><h2>앱 정보</h2>';
   h+='<div class="kv"><span>버전</span><b class="num">'+APP_INFO.ver+'</b></div><div class="kv"><span>제작</span><b>'+esc(APP_INFO.by)+'</b></div>';
@@ -2056,6 +2064,31 @@ function gate(){
     if(gateHash(v)===GATE_H){ try{ localStorage.setItem(GATE_K,'1'); }catch(err){} g.style.transition='opacity .35s'; g.style.opacity='0'; setTimeout(function(){ g.remove(); document.documentElement.style.overflow=''; },380); toast('환영해요! 목표부터 정해 볼까요?'); }
     else { document.getElementById('gate-m').textContent='비밀번호가 맞지 않아요'; g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); }
   });
+}
+var FEATURES=[
+  {id:'racecard',n:'레이스 체크포인트 카드',d:'대회 날 손목시계로 보는 구간별 누적 목표 시간',h:'dc9108b7',since:'2026.10.12'}
+];
+var FK='hx-feat';
+function featList(){ try{ var a=JSON.parse(localStorage.getItem(FK)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function featOn(id){ return !IS_PWA||featList().indexOf(id)>=0; }
+function featUnlock(code){
+  var hh=gateHash(code), have=featList(), got=FEATURES.filter(function(f){ return f.h===hh&&have.indexOf(f.id)<0; });
+  if(got.length){ try{ localStorage.setItem(FK,JSON.stringify(have.concat(got.map(function(f){ return f.id; })))); }catch(e){} }
+  return {got:got,already:FEATURES.some(function(f){ return f.h===hh&&have.indexOf(f.id)>=0; })};
+}
+function featHtml(){
+  var h='<div class="card"><h2>새 기능 열기</h2><div class="muted">새 게시물 · 스토리에서 공개하는 코드를 넣으면 새 기능이 열려요. 한 번 열면 계속 쓸 수 있어요.</div>';
+  h+='<div class="feats">'+FEATURES.map(function(f){ var on=featOn(f.id); return '<div class="feat'+(on?' on':'')+'"><span class="fi">'+(on?'✓':'🔒')+'</span><div><b>'+esc(f.n)+'</b><div class="muted">'+esc(f.d)+'</div></div></div>'; }).join('')+'</div>';
+  if(IS_PWA) h+='<div class="row" style="margin-top:10px"><input type="text" id="feat-code" class="sp" placeholder="코드 입력" autocapitalize="characters" autocomplete="off" spellcheck="false" style="text-transform:uppercase"><button class="btn pri" data-act="featopen">열기</button></div>';
+  return h+'</div>';
+}
+function raceCardHtml(segT,rox){
+  var f=FEATURES[0];
+  if(!featOn('racecard')) return '<div class="card lockc"><div class="lk">🔒</div><h2>'+esc(f.n)+'</h2><div class="muted">'+esc(f.d)+'. 구간이 끝날 때마다 시계에 찍혀 있어야 할 시간을 크게 보여 줘요.</div><div class="lockprev">'+[1,2,3].map(function(i){ return '<div><span>'+SPL[i][0]+'</span><b class="num">?:??</b></div>'; }).join('')+'</div><button class="btn pri" data-tab-go="me" style="margin-top:12px">코드 넣고 열기 ›</button></div>';
+  var per=rox/16, cum=0;
+  var h='<div class="card"><h2>'+esc(f.n)+'</h2><div class="muted" style="margin-bottom:8px">구간이 끝났을 때 시계가 이 시간보다 앞서 있으면 목표 페이스예요. 록스존 이동 시간은 구간마다 나눠 넣었어요.</div><div class="tbl fit"><table class="rcard"><tr><th class="n">#</th><th>구간</th><th class="n">구간</th><th class="n">시계</th></tr>';
+  SPL.forEach(function(r,j){ cum+=segT[j]+per; h+='<tr'+(j%2===0?' class="run"':'')+'><td class="n muted">'+(j+1)+'</td><td>'+r[0].replace(/ \d+(m|개)$/,'')+'</td><td class="n num">'+fmtT(segT[j])+'</td><td class="n num big">'+fmtT(cum)+'</td></tr>'; });
+  return h+'</table></div><div class="muted" style="margin-top:6px">캡처해서 잠금화면에 두거나 출력해 손목에 붙여 두세요.</div></div>';
 }
 function backupHtml(){
   var h='';
@@ -2861,6 +2894,12 @@ document.addEventListener('click',function(e){
     saveTests(); ce.card=card; ce.done=true; store.events=store.events.slice(); saveEvents(); ui.evc=null; ui.evcMsg=''; toast('기록 카드를 저장했어요'); render(); return;
   }
   if(a==='edprev'||a==='ednext'){ ui.edDay=key(keyDn(ui.edDay)+(a==='edprev'?-1:1)); render(); return; }
+  if(a==='featopen'){
+    var fc=document.getElementById('feat-code'), r=featUnlock(fc?fc.value:'');
+    if(r.got.length){ toast('🎉 '+r.got.map(function(f){ return f.n; }).join(', ')+' 열림!'); render(); }
+    else toast(r.already?'이미 열린 기능이에요':'코드가 맞지 않아요');
+    return;
+  }
   if(a==='mesave'){ var nk=document.getElementById('me-nick'); store.goal.nick=(nk?nk.value:'').trim().slice(0,20); saveGoal(); toast('저장했어요'); render(); return; }
   if(a==='megoal'){ ui.goalEdit=true; go('today'); return; }
   if(a==='meshare'){
